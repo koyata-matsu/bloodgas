@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>血液ガス判定クイズ</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>血液ガス判定クイズ</h1>
+      <div class="meta">
+        <span id="modeLabel">Menu</span>
+      </div>
+    </header>
+
+    <!-- 画面1: 難易度選択 -->
+    <section class="card screen" id="screenMenu">
+      <h2>難易度を選ぶ</h2>
+      <p class="muted">まずは「超かんたん」だけでOK。</p>
+
+      <div class="difficulty">
+        <button class="choice big" data-diff="easy">
+          超かんたん（単純性のみ）
+          <span class="sub">pH / PaCO₂ / HCO₃⁻ だけで分類</span>
+        </button>
+
+        <button class="choice big" data-diff="normal" disabled>
+          ふつう（代償チェック）
+          <span class="sub">後日</span>
+        </button>
+
+        <button class="choice big" data-diff="hard" disabled>
+          むずい（AG/混合）
+          <span class="sub">後日</span>
+        </button>
+      </div>
+
+      <div class="actions">
+        <button id="toLessonBtn" class="btn" disabled>次へ（必要知識へ）</button>
+      </div>
+    </section>
+
+    <!-- 画面2: 必要な知識 -->
+    <section class="card screen hidden" id="screenLesson">
+      <h2>演習で必要な知識（超かんたん）</h2>
+
+      <div class="lesson">
+        <div class="lessonBox">
+          <h3>正常値（目安）</h3>
+          <ul>
+            <li><b>pH</b>：7.35–7.45</li>
+            <li><b>PaCO₂</b>：35–45 mmHg</li>
+            <li><b>HCO₃⁻</b>：22–26 mEq/L</li>
+          </ul>
+        </div>
+
+        <div class="lessonBox">
+          <h3>① まずpH</h3>
+          <ul>
+            <li><b>pH &lt; 7.35</b>：アシデミア</li>
+            <li><b>pH &gt; 7.45</b>：アルカレミア</li>
+          </ul>
+        </div>
+
+        <div class="lessonBox">
+          <h3>② 次に原因（どっちが主因？）</h3>
+          <div class="oneBlock">
+            <div>アシデミアで <b>HCO₃⁻↓</b> → <b>代謝性アシドーシス</b></div>
+            <div>アシデミアで <b>PaCO₂↑</b> → <b>呼吸性アシドーシス</b></div>
+            <div>アルカレミアで <b>HCO₃⁻↑</b> → <b>代謝性アルカローシス</b></div>
+            <div>アルカレミアで <b>PaCO₂↓</b> → <b>呼吸性アルカローシス</b></div>
+          </div>
+        </div>
+
+        <div class="lessonBox">
+          <h3>③ 代償は今は気にしない</h3>
+          <p class="muted">最初は「分類だけ」。</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="toGameBtn" class="btn">血ガスゲームへ</button>
+        <button id="backToMenuBtn" class="btn ghost">戻る</button>
+      </div>
+    </section>
+
+    <!-- 画面3: ゲーム -->
+    <section class="card screen hidden" id="screenGame">
+      <div class="hud">
+        <div class="hudBox">
+          <div class="hudRow">
+            <div id="hudStat" class="hudValue">-</div>
+            <div id="hudSub" class="hudNeed">-</div>
+          </div>
+        </div>
+        <button id="toggleNormBtn" class="hudBtn" type="button">正常値</button>
+      </div>
+
+      <div id="normPanel" class="normPanel hidden">
+        <div><b>pH</b> 7.35–7.45</div>
+        <div><b>PaCO₂</b> 35–45 mmHg</div>
+        <div><b>HCO₃⁻</b> 22–26 mEq/L</div>
+      </div>
+
+      <div class="healthRow">
+        <div class="healthBar" aria-label="体力ゲージ">
+          <div id="healthFill" class="healthFill"></div>
+        </div>
+      </div>
+
+      <div class="lane">
+        <div class="goalLine"></div>
+        <!-- 動的qcardはJSで生成 -->
+      </div>
+
+      <div id="judgeFx" class="judgeFx hidden" aria-hidden="true">○</div>
+
+      <!-- スタート画面 -->
+      <div id="startOverlay" class="startOverlay">
+        <div class="startBox">
+          <h2 class="startTitle">血ガスゲーム</h2>
+          <p class="muted">君は30問クリアできる？ 速く正確に答えてスコアを伸ばそう。</p>
+          <button id="startBtn" class="btn">スタート</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="choices" id="choices"></div>
+
+        <div class="confirmRow">
+          <button id="pauseBtn" class="btn ghost">一時停止</button>
+          <button id="restartBtn" class="btn ghost">やり直し</button>
+          <button id="exitBtn" class="btn ghost">メニューへ</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+      </div>
+    </section>
+
+    <!-- 結果モーダル -->
+    <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modalBackdrop"></div>
+      <div id="resultCard" class="modalCard">
+        <div class="modalTop">
+          <div id="rankTitle" class="rankTitle">結果</div>
+        </div>
+
+        <div class="modalBody">
+          <div class="scoreBig"><span id="scoreNum">0</span> 点</div>
+          <div class="scoreSub">
+            正答率：<span id="scoreRate">0</span>%　
+            ミス：<span id="missNum">0</span>
+          </div>
+          <div id="unlockMsg" class="unlockMsg"></div>
+        </div>
+
+        <div class="modalBtns">
+          <button id="retryBtn" class="btn">もう一回</button>
+          <button id="menuBtn" class="btn ghost">メニューへ</button>
+        </div>
+      </div>
+    </div>
+
+    <footer class="foot"><small>血液ガス分類ゲーム</small></footer>
+  </main>
+
+  <!-- Audio -->
+  <audio id="bgmEarly" src="assets/MusMus-BGM-172.mp3" preload="auto" loop></audio>
+  <audio id="bgmLate"  src="assets/MusMus-BGM-171.mp3" preload="auto" loop></audio>
+
+  <audio id="seOk"       src="assets/seikai.mp3" preload="auto"></audio>
+  <audio id="seBad"      src="assets/huseikai.mp3" preload="auto"></audio>
+  <audio id="seFinish"   src="assets/finish.mp3" preload="auto"></audio>
+  <audio id="seGameover" src="assets/gameover.mp3" preload="auto"></audio>
+  <audio id="seClick"    src="assets/maou_se_system49.mp3" preload="auto"></audio>
+
+  <script type="module" src="main.js"></script>
+
+</body>
+</html>

@@ -90,12 +90,19 @@ function makeQ_type3_corrHCO3(){
   const corrAg = to1(randInt(12,35));     // 補正AGを与える
   const hco3 = to1(randInt(4,28));        // HCO3を与える
   const corrHco3 = to1(calcCorrHCO3(hco3, corrAg));
-
-  const {options, correctIndex} = makeOptions(corrHco3);
+  let correctLabel = "純粋なAG開大型";
+  if(corrHco3 > 26) correctLabel = "代謝性アルカローシス合併";
+  if(corrHco3 < 22) correctLabel = "非開大型代謝性アシドーシス合併";
+  const options = shuffle([
+    "代謝性アルカローシス合併",
+    "非開大型代謝性アシドーシス合併",
+    "純粋なAG開大型",
+  ]);
+  const correctIndex = options.indexOf(correctLabel);
 
   return {
-    kind: "calc",
-    prompt: "補正HCO3は？",
+    kind: "judge",
+    prompt: "AGかいだい性代謝性アシドーシスがある。補正AG:◯ HCO3:◯ 補正HCO3を計算し、合併する病態を選べ。",
     items: [
       { k:"補正AG", v: corrAg.toFixed(1) },
       { k:"HCO3", v: hco3.toFixed(1) },
@@ -150,6 +157,7 @@ export function createStage3(){
 
     // 毎問choicesが違う
     getChoices(q){
+      if(q.kind === "judge") return q.options;
       return q.options.map(x => Number(x).toFixed(1));
     },
 

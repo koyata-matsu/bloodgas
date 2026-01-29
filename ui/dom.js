@@ -197,7 +197,7 @@ function createCardElement(q) {
   card.className = "qcard dynamic";
 
   // Stage3など：Na/Cl/HCO3/Alb
-  if (q && q.kind === "calc") {
+  if (q && (q.kind === "calc" || q.kind === "judge")) {
   const itemsHtml = (q.items || []).map(it => {
     const unit = it.unit ? ` <span class="unit">${it.unit}</span>` : "";
     return `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span>${unit}</span>`;

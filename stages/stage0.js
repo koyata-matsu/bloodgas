@@ -53,9 +53,9 @@ const ITEMS = [
     decimals: 0,
     step: 1,
     ranges: {
-      low: [2, 7],
-      normal: [8, 12],
-      high: [13, 24],
+      low: [2, 9],
+      normal: [10, 14],
+      high: [15, 24],
     },
   },
 ];
@@ -118,7 +118,7 @@ export function createStage0() {
     },
     choices: CHOICES_STAGE0,
     hints: [
-      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 8–12",
+      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 10–14",
       "計算式: なし（基準範囲と比較して判定）",
       "覚える: 正常値のレンジを即答できるようにする",
     ],
@@ -139,7 +139,7 @@ export function createStage0() {
           <div><b>PaCO₂</b> 35–45 mmHg</div>
           <div><b>PaO₂</b> 80–100 mmHg</div>
           <div><b>HCO₃⁻</b> 22–26 mEq/L</div>
-          <div><b>AG</b> 8–12 mEq/L</div>
+          <div><b>AG</b> 10–14 mEq/L</div>
         </div>
       </div>
     `,

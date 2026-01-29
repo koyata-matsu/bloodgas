@@ -119,6 +119,7 @@ export function createGame({ ui, audio, stages }) {
 
     for (let i = 0; i < state.cards.length; i++) {
       const c = state.cards[i];
+      const prevEffectiveX = effectiveX(c);
       c.baseLeft = applyLayout({
         laneEl: ui.el.lane,
         el: c.el,
@@ -131,13 +132,7 @@ export function createGame({ ui, audio, stages }) {
         cardMinW: ui.layout.CARD_W_MIN,
         cardMaxW: ui.layout.CARD_W_MAX,
       });
-      if (state.stage.centerCards) {
-        const laneW = ui.el.lane.clientWidth;
-        const cardW = c.el.offsetWidth || 0;
-        const centeredLeft = Math.max(ui.layout.PAD, (laneW - cardW) / 2);
-        c.baseLeft = centeredLeft;
-        c.el.style.left = `${centeredLeft}px`;
-      }
+      c.x = prevEffectiveX - c.baseLeft;
       c.el.style.transform = `translateX(${c.x}px)`;
 
       if (i === tIdx) {
@@ -223,13 +218,13 @@ export function createGame({ ui, audio, stages }) {
 
   function spawnCard() {
     const maxNow = getMaxConcurrent();
-    if (state.cards.length >= maxNow) return;
+    if (state.cards.length >= maxNow) return false;
 
     // lane assignment: 0 then 1
     const used0 = state.cards.some(c => c.laneId === 0);
     const used1 = state.cards.some(c => c.laneId === 1);
     const laneId = !used0 ? 0 : (!used1 ? 1 : null);
-    if (laneId == null) return;
+    if (laneId == null) return false;
 
     const q = state.stage.nextQuestion();
     const el = ui.createCardElement(q);
@@ -256,6 +251,7 @@ export function createGame({ ui, audio, stages }) {
 
     // ★ターゲットが変わるので必ず更新
     updateChoicesForTarget();
+    return true;
   }
 
   function calcSpawnIntervalSec(maxNow) {
@@ -281,8 +277,8 @@ export function createGame({ ui, audio, stages }) {
 
     if (maxNow === 1) {
       if (state.cards.length === 0 && state.spawnCooldown <= 0) {
-        spawnCard();
-        state.spawnCooldown = calcSpawnIntervalSec(maxNow);
+        const spawned = spawnCard();
+        if (spawned) state.spawnCooldown = calcSpawnIntervalSec(getMaxConcurrent());
       }
       return;
     }
@@ -290,8 +286,8 @@ export function createGame({ ui, audio, stages }) {
     // 2レーン：上下まとめて0.8秒未満禁止、1回に1枚だけ
     const gapOk = (nowSec - state.lastSpawnAt) >= state.minGapTwoLane;
     if (state.cards.length < 2 && state.spawnCooldown <= 0 && gapOk) {
-      spawnCard();
-      state.spawnCooldown = calcSpawnIntervalSec(maxNow);
+      const spawned = spawnCard();
+      if (spawned) state.spawnCooldown = calcSpawnIntervalSec(getMaxConcurrent());
     }
   }
 
@@ -530,7 +526,10 @@ export function createGame({ ui, audio, stages }) {
     state.paused = false;
     state.lastTs = null;
 
-    if (state.cards.length === 0) spawnCard();
+    if (state.cards.length === 0) {
+      const spawned = spawnCard();
+      if (spawned) state.spawnCooldown = calcSpawnIntervalSec(getMaxConcurrent());
+    }
     cbBgmMode("early");
     audio.bgm("early");
 

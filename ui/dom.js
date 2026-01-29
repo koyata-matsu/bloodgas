@@ -196,6 +196,18 @@ function createCardElement(q) {
   const card = document.createElement("div");
   card.className = "qcard dynamic";
 
+  // Stage0: 正常値判定
+  if (q && q.kind === "norm") {
+    const unit = q.unit ? ` <span class="unit">${q.unit}</span>` : "";
+    card.innerHTML = `
+      <div class="qOne">
+        <span class="qItem norm"><b>${q.item}</b> <span class="vval">${q.value}</span>${unit}</span>
+      </div>
+      <div class="qIcon" aria-hidden="true">🧪</div>
+    `;
+    return card;
+  }
+
   // Stage3など：Na/Cl/HCO3/Alb
   if (q && q.kind === "calc") {
   const itemsHtml = (q.items || []).map(it => {

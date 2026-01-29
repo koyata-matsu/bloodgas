@@ -2,6 +2,7 @@ import { createUI } from "./ui/dom.js";
 import { createAudio } from "./ui/audio.js";
 import { createGame } from "./engine/game.js";
 
+import { createStage0 } from "./stages/stage0.js";
 import { createStage1 } from "./stages/stage1.js";
 import { createStage2 } from "./stages/stage2.js";
 import { createStage3 } from "./stages/stage3.js";
@@ -14,6 +15,7 @@ const ui = createUI();
 const audio = createAudio();
 
 const stages = [
+  createStage0(),
   createStage1(),
   createStage2(),
   createStage3(),
@@ -26,7 +28,7 @@ const game = createGame({ ui, audio, stages });
 let selectedStageId = 1;
 
 function getUnlockedMax() {
-  return 5;
+  return 6;
 }
 function setUnlockedMax(v) {
   localStorage.setItem(LS_UNLOCK_KEY, String(v));

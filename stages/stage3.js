@@ -125,7 +125,7 @@ export function createStage3(){
   let idx = 0;
 
   return {
-    id: 3,
+    id: 4,
     name: "ステージ3：AG計算と補正",
     unlockNeed: 18,      // ★18問で次ステージ解放
     clearCount: 30,

@@ -437,6 +437,102 @@ const CASES = [
     history: "糖尿病患者で発熱と頻呼吸。",
     pathologies: ["DKA", "乳酸アシドーシス"],
   },
+  {
+    id: "ag-16",
+    gas: { ph: 7.18, paco2: 30, hco3: 11, na: 142, cl: 100, alb: 3.2 },
+    abnormalities: ["代謝性アシドーシス", "AG開大型代謝性アシドーシス", "呼吸性アルカローシス"],
+    tests: { options: ["血中乳酸", "胸部X線", "SpO₂", "BUN / Cr"], correct: ["血中乳酸"] },
+    history: "敗血症疑いでショック。冷汗と頻呼吸。",
+    pathologies: ["敗血症", "乳酸アシドーシス"],
+  },
+  {
+    id: "ag-17",
+    gas: { ph: 7.24, paco2: 27, hco3: 12, na: 137, cl: 96, alb: 4.0 },
+    abnormalities: ["代謝性アシドーシス", "AG開大型代謝性アシドーシス", "呼吸性アルカローシス"],
+    tests: { options: ["血糖・尿ケトン", "血中乳酸", "BUN / Cr", "胸部X線"], correct: ["血糖・尿ケトン"] },
+    history: "口渇と多尿。インスリン未使用が続いている。",
+    pathologies: ["DKA", "ケトアシドーシス"],
+  },
+  {
+    id: "ag-18",
+    gas: { ph: 7.27, paco2: 29, hco3: 13, na: 139, cl: 98, alb: 4.1 },
+    abnormalities: ["代謝性アシドーシス", "AG開大型代謝性アシドーシス"],
+    tests: { options: ["血糖・尿ケトン", "BUN / Cr", "尿電解質", "血中乳酸"], correct: ["血糖・尿ケトン"] },
+    history: "絶食が続いた後に嘔吐。飲酒歴あり。",
+    pathologies: ["アルコール性ケトアシドーシス", "ケトアシドーシス"],
+  },
+  {
+    id: "nag-11",
+    gas: { ph: 7.29, paco2: 33, hco3: 16, na: 141, cl: 112, alb: 3.9 },
+    abnormalities: ["代謝性アシドーシス", "非開大型代謝性アシドーシス"],
+    tests: { options: ["尿電解質", "尿Cl", "BUN / Cr", "SpO₂"], correct: ["尿電解質"] },
+    history: "腎結石の既往。尿pH高値でRTA疑い。",
+    pathologies: ["RTA"],
+  },
+  {
+    id: "nag-12",
+    gas: { ph: 7.31, paco2: 34, hco3: 17, na: 138, cl: 111, alb: 4.0 },
+    abnormalities: ["代謝性アシドーシス", "非開大型代謝性アシドーシス"],
+    tests: { options: ["尿電解質", "BUN / Cr", "尿Cl", "SpO₂"], correct: ["尿電解質"] },
+    history: "水様性下痢が続き、脱水症状が強い。",
+    pathologies: ["下痢"],
+  },
+  {
+    id: "alk-11",
+    gas: { ph: 7.50, paco2: 46, hco3: 34, na: 137, cl: 90, alb: 4.0 },
+    abnormalities: ["代謝性アルカローシス", "呼吸性アシドーシス"],
+    tests: { options: ["尿Cl", "尿電解質", "BUN / Cr", "SpO₂"], correct: ["尿Cl"] },
+    history: "反復する嘔吐と脱水。",
+    pathologies: ["嘔吐"],
+  },
+  {
+    id: "alk-12",
+    gas: { ph: 7.48, paco2: 45, hco3: 33, na: 139, cl: 92, alb: 4.1 },
+    abnormalities: ["代謝性アルカローシス"],
+    tests: { options: ["尿Cl", "尿電解質", "BUN / Cr", "SpO₂"], correct: ["尿Cl"] },
+    history: "利尿薬を追加してから筋力低下。",
+    pathologies: ["利尿薬使用"],
+  },
+  {
+    id: "resp-11",
+    gas: { ph: 7.28, paco2: 64, hco3: 24, na: 140, cl: 101, alb: 3.8 },
+    abnormalities: ["呼吸性アシドーシス", "代謝性代償なし"],
+    tests: { options: ["SpO₂", "胸部X線", "BUN / Cr", "血中乳酸"], correct: ["SpO₂"] },
+    history: "COPD既往。急な呼吸苦とCO₂貯留。",
+    pathologies: ["COPD増悪"],
+  },
+  {
+    id: "resp-12",
+    gas: { ph: 7.36, paco2: 58, hco3: 32, na: 138, cl: 99, alb: 4.0 },
+    abnormalities: ["呼吸性アシドーシス", "代謝性代償あり"],
+    tests: { options: ["胸部X線", "SpO₂", "BUN / Cr", "尿電解質"], correct: ["胸部X線"] },
+    history: "長期喫煙歴。慢性的に息切れ。",
+    pathologies: ["COPD増悪"],
+  },
+  {
+    id: "resp-13",
+    gas: { ph: 7.54, paco2: 26, hco3: 22, na: 139, cl: 104, alb: 4.1 },
+    abnormalities: ["呼吸性アルカローシス", "代謝性代償なし"],
+    tests: { options: ["SpO₂", "胸部X線", "血中乳酸", "BUN / Cr"], correct: ["SpO₂"] },
+    history: "強い不安と過換気。手指のしびれ。",
+    pathologies: ["過換気症候群"],
+  },
+  {
+    id: "mix-06",
+    gas: { ph: 7.36, paco2: 50, hco3: 28, na: 138, cl: 94, alb: 4.2 },
+    abnormalities: ["呼吸性アシドーシス", "代謝性アルカローシス", "代謝性代償あり"],
+    tests: { options: ["胸部X線", "尿Cl", "SpO₂", "BUN / Cr"], correct: ["胸部X線", "尿Cl"] },
+    history: "COPDで利尿薬使用中。嘔吐もある。",
+    pathologies: ["COPD増悪", "利尿薬使用", "嘔吐"],
+  },
+  {
+    id: "mix-07",
+    gas: { ph: 7.40, paco2: 28, hco3: 17, na: 141, cl: 100, alb: 4.0 },
+    abnormalities: ["代謝性アシドーシス", "AG開大型代謝性アシドーシス", "呼吸性アルカローシス"],
+    tests: { options: ["血中乳酸", "血糖・尿ケトン", "SpO₂", "胸部X線"], correct: ["血中乳酸", "SpO₂"] },
+    history: "肺炎で入院中。呼吸数増加と低酸素。",
+    pathologies: ["敗血症", "乳酸アシドーシス"],
+  },
 ];
 
 function calcAG({ na, cl, hco3 }) {
@@ -523,7 +619,7 @@ export function createStage6() {
 
   return {
     id: 7,
-    name: "ステージ6：総合問題",
+    name: "ステージ6：症例ベース総合問題",
     unlockNeed: 18,
     clearCount: 30,
     overlapStart: 14,
@@ -531,15 +627,41 @@ export function createStage6() {
 
     lessonHTML: `
       <div class="lessonBox">
-        <h3>ステージ6：総合問題</h3>
+        <h3>ステージ6：症例ベース総合問題</h3>
         <div class="oneBlock">
-          <div>血ガス提示 → 酸塩基異常の複数選択 → 追加検査 → 現病歴 → 病態選択の流れで回答。</div>
-          <div>病態は複数選択なので、該当するものをすべて選択して決定。</div>
+          <div>血ガス提示 → 酸塩基異常の複数選択 → 追加検査 → 現病歴 → 病態推論の流れ。</div>
+          <div>複数選択の問題では、該当するものを<b>すべて</b>選んで決定。</div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>読む順番</h3>
+        <div class="oneBlock">
+          <div>① pHで方向 → ② PaCO₂/HCO₃⁻で主病態</div>
+          <div>③ AGと補正AGで開大性か判断</div>
+          <div>④ 代償の過不足があれば混合を疑う</div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>追加検査の考え方</h3>
+        <div class="oneBlock">
+          <div>AG開大型 → <b>乳酸</b> / <b>血糖・尿ケトン</b> / <b>腎機能</b></div>
+          <div>非開大型 → <b>尿電解質</b> / <b>尿Cl</b></div>
+          <div>呼吸性 → <b>SpO₂</b> / <b>胸部X線</b></div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>症例のコツ</h3>
+        <div class="oneBlock">
+          <div>病歴で「感染・糖尿病・嘔吐・下痢・利尿薬・慢性肺疾患」を拾う。</div>
+          <div>血ガスだけでなく<b>背景情報もセットで推論</b>する。</div>
         </div>
       </div>
     `,
 
-    startDesc: "血ガスから病態を推論し、複数ステップで解答。",
+    startDesc: "血ガスと病歴を統合して、複数ステップで病態推論。",
 
     maxConcurrent() {
       return 1;

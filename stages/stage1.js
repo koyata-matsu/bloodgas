@@ -36,12 +36,45 @@ export function createStage1() {
 
   return {
     id: 2,
-    name: "ステージ1：分類",
+    name: "ステージ1：酸塩基の4分類",
     unlockNeed: 18,
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE1,
+
+    lessonHTML: `
+      <div class="lessonBox">
+        <h3>ステージ1：酸塩基の4分類</h3>
+        <div class="oneBlock">
+          <div>まず<b>pH</b>で「アシドーシス / アルカローシス」を決める。</div>
+          <div>次に<b>PaCO₂</b>と<b>HCO₃⁻</b>のどちらがpHの変化方向と一致しているかを見る。</div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>判定の流れ</h3>
+        <div class="oneBlock">
+          <div><b>pH↓</b> → アシドーシス</div>
+          <div>・PaCO₂↑なら <b>呼吸性アシドーシス</b></div>
+          <div>・HCO₃⁻↓なら <b>代謝性アシドーシス</b></div>
+          <div><b>pH↑</b> → アルカローシス</div>
+          <div>・PaCO₂↓なら <b>呼吸性アルカローシス</b></div>
+          <div>・HCO₃⁻↑なら <b>代謝性アルカローシス</b></div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>コツ</h3>
+        <div class="oneBlock">
+          <div>まず<b>pH</b>だけ見て方向を決める。</div>
+          <div>次に「pHを<b>説明できる</b>パラメータ」を主病態として選択。</div>
+          <div>もう片方は<b>代償</b>の可能性が高い。</div>
+        </div>
+      </div>
+    `,
+
+    startDesc: "pH → PaCO₂/HCO₃⁻の一致方向で主病態を4分類する。",
 
     nextQuestion() {
       if (idx >= bank.length) {

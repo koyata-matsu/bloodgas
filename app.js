@@ -60,11 +60,15 @@ ui.onSelectStage((stageId) => {
   selectedStageId = stageId;
   game.setStage(stageId);
   applyStageToLesson(stageId);
+  audio.stopBGM();
   ui.showScreen("lesson"); // ★ステージ2は必ず解説ページへ → 全ステージこれで統一
 });
 
 // ---- screen navigation ----
-ui.onGoLesson(() => ui.showScreen("lesson"));
+ui.onGoLesson(() => {
+  audio.stopBGM();
+  ui.showScreen("lesson");
+});
 ui.onBackToMenu(() => ui.showScreen("menu"));
 
 ui.onGoGame(() => {
@@ -109,6 +113,7 @@ ui.onResultNextStage(() => {
     selectedStageId = nextId;
     game.setStage(nextId);
     applyStageToLesson(nextId);
+    audio.stopBGM();
     ui.showScreen("lesson");
   } else {
     ui.showScreen("menu");

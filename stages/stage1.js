@@ -1,5 +1,12 @@
 import { shuffle } from "../utils/rand.js";
 
+const CHOICES_STAGE1 = [
+  "代謝性アシドーシス",
+  "呼吸性アシドーシス",
+  "代謝性アルカローシス",
+  "呼吸性アルカローシス",
+];
+
 function makeBank100() {
   const bank = [];
   const push = (ph, paco2, hco3, ans) => bank.push({ ph, paco2, hco3, ans });
@@ -34,6 +41,7 @@ export function createStage1() {
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
+    choices: CHOICES_STAGE1,
 
     nextQuestion() {
       if (idx >= bank.length) {
@@ -43,10 +51,8 @@ export function createStage1() {
       return bank[idx++];
     },
 
-    checkClassify(q, choiceIdx) {
+    checkChoice(q, choiceIdx) {
       return choiceIdx === q.ans;
     },
-
-    checkComp() { return true; },
   };
 }

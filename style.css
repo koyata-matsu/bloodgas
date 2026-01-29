@@ -163,6 +163,47 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 .hpLoss { background:#b3261e !important; animation: hpPulse .25s linear 1; }
 .hpBarShake { animation: hpShake .22s linear 1; border-color:#b3261e !important; }
 
+/* Question header */
+.questionArea{
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e6e6ef;
+  border-radius: 12px;
+  background: #f9fafb;
+  margin-bottom: 12px;
+}
+.questionHeader{
+  display: grid;
+  gap: 6px;
+  text-align: center;
+  font-weight: 700;
+}
+.questionStep{
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 700;
+}
+.questionText{
+  font-size: 16px;
+  color: #111827;
+}
+.timeBar{
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+.timeFill{
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #111827, #334155);
+  transform-origin: 100% 50%;
+  transform: scaleX(1);
+  transition: transform 120ms linear;
+}
+
 /* Lane */
 .lane{
   position: relative;

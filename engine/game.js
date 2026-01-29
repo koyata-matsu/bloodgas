@@ -50,6 +50,7 @@ export function createGame({ ui, audio, stages }) {
     if (!state.cards.length) {
       // 何も無い時は固定choicesがあれば出す
       if (state.stage.choices) ui.renderChoices(state.stage.choices);
+      updateQuestionForTarget();
       return;
     }
     const tIdx = pickTargetIndex(state.cards);
@@ -61,32 +62,55 @@ export function createGame({ ui, audio, stages }) {
       const choicePayload = state.stage.getChoices(q);
       if (Array.isArray(choicePayload)) {
         ui.renderChoices(choicePayload);
+        updateQuestionForTarget();
         return;
       }
       if (choicePayload?.multi) {
         ui.renderMultiChoices(choicePayload.labels, choicePayload.submitLabel);
+        updateQuestionForTarget();
         return;
       }
       if (choicePayload?.labels) {
         ui.renderChoices(choicePayload.labels);
+        updateQuestionForTarget();
         return;
       }
       ui.renderChoices(["..."]);
+      updateQuestionForTarget();
       return;
     }
     // ★固定choices（Stage1/2など）
     if (state.stage.choices) {
       ui.renderChoices(state.stage.choices);
+      updateQuestionForTarget();
       return;
     }
     // fallback
     ui.renderChoices(["..."]);
+    updateQuestionForTarget();
   }
 
   function updateHints() {
     const hints = state.stage.hints || [];
     const show = state.spawnedCount <= 10;
     ui.setHints(hints, show);
+  }
+
+  function updateQuestionForTarget() {
+    const showQuestion = Boolean(state.stage.questionMode);
+    ui.showQuestionArea(showQuestion);
+    if (!showQuestion) return;
+    if (!state.cards.length) {
+      ui.setQuestionText("");
+      ui.setQuestionStep("");
+      ui.setTimerProgress(1);
+      return;
+    }
+    const tIdx = pickTargetIndex(state.cards);
+    if (tIdx < 0) return;
+    const q = state.cards[tIdx].q;
+    ui.setQuestionText(q.prompt || "");
+    ui.setQuestionStep(q.stepLabel || "");
   }
 
   function forceRelayoutAll() {
@@ -107,6 +131,13 @@ export function createGame({ ui, audio, stages }) {
         cardMinW: ui.layout.CARD_W_MIN,
         cardMaxW: ui.layout.CARD_W_MAX,
       });
+      if (state.stage.centerCards) {
+        const laneW = ui.el.lane.clientWidth;
+        const cardW = c.el.offsetWidth || 0;
+        const centeredLeft = Math.max(ui.layout.PAD, (laneW - cardW) / 2);
+        c.baseLeft = centeredLeft;
+        c.el.style.left = `${centeredLeft}px`;
+      }
       c.el.style.transform = `translateX(${c.x}px)`;
 
       if (i === tIdx) {
@@ -159,7 +190,7 @@ export function createGame({ ui, audio, stages }) {
 
     state.hpMax = 100;
     state.hp = 60;
-    state.timeLimitSec = 15.0;
+    state.timeLimitSec = state.stage.timeLimitStart ?? 15.0;
 
     state.spawnedCount = 0;
     state.correct = 0;
@@ -184,6 +215,7 @@ export function createGame({ ui, audio, stages }) {
     cbFeedback("");
     ui.setLaneHeight(getMaxConcurrent());
     updateHints();
+    updateQuestionForTarget();
 
     // ★ここでchoicesを安全に描画
     updateChoicesForTarget();
@@ -207,13 +239,15 @@ export function createGame({ ui, audio, stages }) {
       q,
       laneId,
       baseLeft: 0,
-      x: ui.el.lane.clientWidth + 30,
+      x: state.stage.staticQuestion ? 0 : ui.el.lane.clientWidth + 30,
       bornAt: performance.now(),
       el,
     });
 
     state.spawnedCount += 1;
-    state.timeLimitSec = Math.max(4.5, state.timeLimitSec - 0.08);
+    if (!state.stage.staticQuestion) {
+      state.timeLimitSec = Math.max(4.5, state.timeLimitSec - 0.08);
+    }
     state.lastSpawnAt = performance.now() / 1000;
 
     cbBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
@@ -385,7 +419,13 @@ export function createGame({ ui, audio, stages }) {
     const timeLeft = Math.max(0, state.timeLimitSec - elapsed);
 
     setHP(state.hp + (5 + 0.9 * timeLeft), "gain");
-    state.timeLimitSec = Math.max(4.5, state.timeLimitSec - 0.55);
+    if (state.stage.staticQuestion) {
+      const minLimit = state.stage.timeLimitMin ?? 20;
+      const decay = state.stage.timeLimitDecay ?? 2;
+      state.timeLimitSec = Math.max(minLimit, state.timeLimitSec - decay);
+    } else {
+      state.timeLimitSec = Math.max(4.5, state.timeLimitSec - 0.55);
+    }
 
     removeCardAt(tIdx);
 
@@ -427,6 +467,26 @@ export function createGame({ ui, audio, stages }) {
 
     ensureSpawn(dt);
 
+    if (state.stage.staticQuestion) {
+      const tIdx = pickTargetIndex(state.cards);
+      if (tIdx >= 0) {
+        const t = state.cards[tIdx];
+        const elapsed = (performance.now() - t.bornAt) / 1000;
+        const timeLeft = Math.max(0, state.timeLimitSec - elapsed);
+        ui.setTimerProgress(timeLeft / Math.max(0.001, state.timeLimitSec));
+        if (timeLeft <= 0) {
+          handleWrong("時間切れ！", 12);
+          if (state.running && !state.paused) state.rafId = requestAnimationFrame(loop);
+          return;
+        }
+      } else {
+        ui.setTimerProgress(1);
+      }
+      forceRelayoutAll();
+      state.rafId = requestAnimationFrame(loop);
+      return;
+    }
+
     // move
     const startX = ui.el.lane.clientWidth + 30;
     const dist = Math.max(1, startX - ui.layout.MISS_X);
@@ -454,6 +514,7 @@ export function createGame({ ui, audio, stages }) {
   function prepareRun() {
     resetRun();
     ui.showStartOverlay(state.stage.name);
+    ui.setTimerProgress(1);
 
     // ★ここが重要：固定choicesが無いステージでも落ちない
     if (state.stage.choices) {

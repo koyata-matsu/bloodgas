@@ -10,75 +10,50 @@
   <main class="wrap">
     <header class="head">
       <h1>血液ガス判定クイズ</h1>
-      <div class="meta">
-        <span id="modeLabel">Menu</span>
-      </div>
+      <div class="meta"><span id="modeLabel">Menu</span></div>
     </header>
 
-    <!-- 画面1: 難易度選択 -->
+    <!-- MENU: 5ステージ -->
     <section class="card screen" id="screenMenu">
-      <h2>難易度を選ぶ</h2>
-      <p class="muted">まずは「超かんたん」だけでOK。</p>
+      <h2>ステージを選ぶ</h2>
+      <p class="muted">ステージをクリアして次を解放しよう。</p>
 
-      <div class="difficulty">
-        <button class="choice big" data-diff="easy">
-          超かんたん（単純性のみ）
-          <span class="sub">pH / PaCO₂ / HCO₃⁻ だけで分類</span>
+      <div class="difficulty" id="stageList">
+        <button class="choice big stageBtn" data-stage="1">
+          ステージ1：分類
+          <span class="sub">pH / PaCO₂ / HCO₃⁻ で4分類</span>
         </button>
 
-        <button class="choice big" data-diff="normal" disabled>
-          ふつう（代償チェック）
+        <button class="choice big stageBtn" data-stage="2" disabled>
+          ステージ2：代謝性の代償について
+          <span class="sub">HCO₃ + 15 で予測PaCO₂ → 合併の有無</span>
+        </button>
+
+        <button class="choice big stageBtn" data-stage="3" disabled>
+          ステージ3：AG（準備中）
           <span class="sub">後日</span>
         </button>
 
-        <button class="choice big" data-diff="hard" disabled>
-          むずい（AG/混合）
+        <button class="choice big stageBtn" data-stage="4" disabled>
+          ステージ4：混合（準備中）
+          <span class="sub">後日</span>
+        </button>
+
+        <button class="choice big stageBtn" data-stage="5" disabled>
+          ステージ5：酸素化（準備中）
           <span class="sub">後日</span>
         </button>
       </div>
 
       <div class="actions">
-        <button id="toLessonBtn" class="btn" disabled>次へ（必要知識へ）</button>
+        <button id="toLessonBtn" class="btn" disabled>解説へ</button>
       </div>
     </section>
 
-    <!-- 画面2: 必要な知識 -->
+    <!-- LESSON -->
     <section class="card screen hidden" id="screenLesson">
-      <h2>演習で必要な知識（超かんたん）</h2>
-
-      <div class="lesson">
-        <div class="lessonBox">
-          <h3>正常値（目安）</h3>
-          <ul>
-            <li><b>pH</b>：7.35–7.45</li>
-            <li><b>PaCO₂</b>：35–45 mmHg</li>
-            <li><b>HCO₃⁻</b>：22–26 mEq/L</li>
-          </ul>
-        </div>
-
-        <div class="lessonBox">
-          <h3>① まずpH</h3>
-          <ul>
-            <li><b>pH &lt; 7.35</b>：アシデミア</li>
-            <li><b>pH &gt; 7.45</b>：アルカレミア</li>
-          </ul>
-        </div>
-
-        <div class="lessonBox">
-          <h3>② 次に原因（どっちが主因？）</h3>
-          <div class="oneBlock">
-            <div>アシデミアで <b>HCO₃⁻↓</b> → <b>代謝性アシドーシス</b></div>
-            <div>アシデミアで <b>PaCO₂↑</b> → <b>呼吸性アシドーシス</b></div>
-            <div>アルカレミアで <b>HCO₃⁻↑</b> → <b>代謝性アルカローシス</b></div>
-            <div>アルカレミアで <b>PaCO₂↓</b> → <b>呼吸性アルカローシス</b></div>
-          </div>
-        </div>
-
-        <div class="lessonBox">
-          <h3>③ 代償は今は気にしない</h3>
-          <p class="muted">最初は「分類だけ」。</p>
-        </div>
-      </div>
+      <h2 id="lessonTitle">解説</h2>
+      <div id="lessonBody" class="lesson"></div>
 
       <div class="actions">
         <button id="toGameBtn" class="btn">血ガスゲームへ</button>
@@ -86,7 +61,7 @@
       </div>
     </section>
 
-    <!-- 画面3: ゲーム -->
+    <!-- GAME -->
     <section class="card screen hidden" id="screenGame">
       <div class="hud">
         <div class="hudBox">
@@ -112,22 +87,26 @@
 
       <div class="lane">
         <div class="goalLine"></div>
-        <!-- 動的qcardはJSで生成 -->
       </div>
 
       <div id="judgeFx" class="judgeFx hidden" aria-hidden="true">○</div>
 
-      <!-- スタート画面 -->
       <div id="startOverlay" class="startOverlay">
         <div class="startBox">
-          <h2 class="startTitle">血ガスゲーム</h2>
-          <p class="muted">君は30問クリアできる？ 速く正確に答えてスコアを伸ばそう。</p>
+          <h2 class="startTitle" id="startTitle">血ガスゲーム</h2>
+          <p class="muted" id="startDesc">スタートして開始</p>
           <button id="startBtn" class="btn">スタート</button>
         </div>
       </div>
 
       <div class="panel">
         <div class="choices" id="choices"></div>
+
+        <!-- Stage2用（使わないが残してもOK） -->
+        <div class="choices hidden" id="compChoices">
+          <button class="choiceBtn" id="compOkBtn">代償OK</button>
+          <button class="choiceBtn" id="compNgBtn">代償NG</button>
+        </div>
 
         <div class="confirmRow">
           <button id="pauseBtn" class="btn ghost">一時停止</button>
@@ -139,16 +118,16 @@
       </div>
     </section>
 
-    <!-- 結果モーダル -->
+    <!-- RESULT -->
     <div id="resultModal" class="modal hidden" role="dialog" aria-modal="true">
       <div class="modalBackdrop"></div>
-      <div id="resultCard" class="modalCard">
+      <div class="modalCard">
         <div class="modalTop">
           <div id="rankTitle" class="rankTitle">結果</div>
         </div>
 
         <div class="modalBody">
-          <div class="scoreBig"><span id="scoreNum">0</span> 点</div>
+          <div class="scoreBig"><span id="scoreNum">0</span></div>
           <div class="scoreSub">
             正答率：<span id="scoreRate">0</span>%　
             ミス：<span id="missNum">0</span>
@@ -158,12 +137,13 @@
 
         <div class="modalBtns">
           <button id="retryBtn" class="btn">もう一回</button>
+          <button id="nextBtn" class="btn" disabled>次ステージへ</button>
           <button id="menuBtn" class="btn ghost">メニューへ</button>
         </div>
       </div>
     </div>
 
-    <footer class="foot"><small>血液ガス分類ゲーム</small></footer>
+    <footer class="foot"><small>血液ガスゲーム</small></footer>
   </main>
 
   <!-- Audio -->
@@ -174,8 +154,10 @@
   <audio id="seBad"      src="assets/huseikai.mp3" preload="auto"></audio>
   <audio id="seFinish"   src="assets/finish.mp3" preload="auto"></audio>
   <audio id="seGameover" src="assets/gameover.mp3" preload="auto"></audio>
+  <audio id="seUnlock"   src="assets/maou_game_jingle09.mp3" preload="auto"></audio>
   <audio id="seClick"    src="assets/maou_se_system49.mp3" preload="auto"></audio>
 
-  <script type="module" src="app.js"></script>
+  <!-- ★希望通り：app.js を moduleで -->
+  <script type="module" src="./app.js"></script>
 </body>
 </html>

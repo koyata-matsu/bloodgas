@@ -36,7 +36,7 @@ const LS_LOG_KEY = "bg_game_logs_v1";
 const LS_LOG_UPLOAD_URL_KEY = "bg_log_upload_url";
 const LS_LOG_LAST_UPLOAD_KEY = "bg_log_last_upload_at";
 const UPLOAD_INTERVAL_MS = 1000 * 60 * 60 * 24;
-const DEFAULT_UPLOAD_URL = "";
+const DEFAULT_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwsDePBZyEwAluHo6n3p8XDtuECic04pFljbyZd-kqFS02VX6AIrQ5p3I1L5jpl_AH-/exec";
 
 function loadLogStore() {
   try {

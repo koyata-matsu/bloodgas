@@ -33,6 +33,10 @@ let runStartAt = null;
 let runEvents = [];
 
 const LS_LOG_KEY = "bg_game_logs_v1";
+const LS_LOG_UPLOAD_URL_KEY = "bg_log_upload_url";
+const LS_LOG_LAST_UPLOAD_KEY = "bg_log_last_upload_at";
+const UPLOAD_INTERVAL_MS = 1000 * 60 * 60 * 24 * 2;
+const DEFAULT_UPLOAD_URL = "";
 
 function loadLogStore() {
   try {
@@ -97,6 +101,7 @@ function recordLogEvent(event) {
   const withMeta = {
     runId: activeRunId,
     timestamp: new Date().toISOString(),
+    uploadedAt: null,
     ...event,
   };
   logStore.events.push(withMeta);
@@ -174,6 +179,61 @@ function downloadLogCsv() {
   URL.revokeObjectURL(url);
 }
 
+function getUploadUrl() {
+  return window.BG_LOG_UPLOAD_URL
+    || localStorage.getItem(LS_LOG_UPLOAD_URL_KEY)
+    || DEFAULT_UPLOAD_URL;
+}
+
+function getLastUploadAt() {
+  const raw = localStorage.getItem(LS_LOG_LAST_UPLOAD_KEY);
+  return raw ? Number(raw) : 0;
+}
+
+function setLastUploadAt(value) {
+  localStorage.setItem(LS_LOG_LAST_UPLOAD_KEY, String(value));
+}
+
+function collectPendingEvents() {
+  return logStore.events.filter(event => !event.uploadedAt);
+}
+
+async function uploadLogsIfDue() {
+  const uploadUrl = getUploadUrl();
+  if (!uploadUrl) return;
+
+  const now = Date.now();
+  const lastUploadAt = getLastUploadAt();
+  if (now - lastUploadAt < UPLOAD_INTERVAL_MS) return;
+
+  const pending = collectPendingEvents();
+  if (!pending.length) return;
+
+  try {
+    const res = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        source: "bloodgas",
+        events: pending,
+      }),
+    });
+    if (!res.ok) {
+      console.warn("Log upload failed", res.status);
+      return;
+    }
+    const uploadedAt = new Date().toISOString();
+    pending.forEach((event) => {
+      event.uploadedAt = uploadedAt;
+    });
+    setLastUploadAt(now);
+    saveLogStore();
+  } catch (err) {
+    console.warn("Log upload error", err);
+  }
+}
+
 function getUnlockedMax() {
   return 7;
 }
@@ -215,6 +275,8 @@ ui.onGoLesson(() => {
   ui.showScreen("lesson");
 });
 ui.onBackToMenu(() => ui.showScreen("menu"));
+
+uploadLogsIfDue();
 
 ui.onGoGame(() => {
   ui.showScreen("game");
@@ -338,6 +400,7 @@ game.onResult((result) => {
     runEndAt: new Date().toISOString(),
     wrongQuestions,
   });
+  void uploadLogsIfDue();
 });
 
 // init

@@ -24,6 +24,11 @@ export function createUI() {
     healthFill: $("healthFill"),
     healthBar: document.querySelector(".healthBar"),
 
+    questionArea: $("questionArea"),
+    questionStep: $("questionStep"),
+    questionText: $("questionText"),
+    timeFill: $("timeFill"),
+
     lane: document.querySelector(".lane"),
 
     choices: $("choices"),
@@ -136,6 +141,25 @@ export function createUI() {
       el.healthFill.classList.add("hpLoss");
       setTimeout(() => el.healthFill.classList.remove("hpLoss"), 280);
     }
+  }
+
+  function showQuestionArea(on) {
+    if (!el.questionArea) return;
+    el.questionArea.classList.toggle("hidden", !on);
+  }
+
+  function setQuestionText(text) {
+    if (el.questionText) el.questionText.textContent = text || "";
+  }
+
+  function setQuestionStep(step) {
+    if (el.questionStep) el.questionStep.textContent = step || "";
+  }
+
+  function setTimerProgress(ratio) {
+    if (!el.timeFill) return;
+    const safeRatio = Math.max(0, Math.min(1, ratio));
+    el.timeFill.style.transform = `scaleX(${safeRatio})`;
   }
 
   function shakeHP() {
@@ -435,6 +459,10 @@ export function createUI() {
     setHUD,
     setLaneHeight,
     setHP,
+    showQuestionArea,
+    setQuestionText,
+    setQuestionStep,
+    setTimerProgress,
     shakeHP,
     setFeedback,
     showJudge,

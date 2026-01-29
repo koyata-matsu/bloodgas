@@ -224,10 +224,19 @@ export function createGame({ ui, audio, stages }) {
     updateChoicesForTarget();
   }
 
-  function calcSpawnIntervalSec() {
+  function calcSpawnIntervalSec(maxNow) {
+    const defaultInterval = {
+      start: 2.8,
+      end: 1.2,
+      min: 0.8,
+    };
+    const interval =
+      maxNow === 2 && state.stage.twoLaneSpawnInterval
+        ? { ...defaultInterval, ...state.stage.twoLaneSpawnInterval }
+        : defaultInterval;
     const t = clamp((state.spawnedCount - state.stage.overlapStart) / 20, 0, 1);
-    const v = 2.8 + (1.2 - 2.8) * t;
-    return Math.max(0.8, v);
+    const v = interval.start + (interval.end - interval.start) * t;
+    return Math.max(interval.min, v);
   }
 
   function ensureSpawn(dt) {
@@ -239,7 +248,7 @@ export function createGame({ ui, audio, stages }) {
     if (maxNow === 1) {
       if (state.cards.length === 0 && state.spawnCooldown <= 0) {
         spawnCard();
-        state.spawnCooldown = calcSpawnIntervalSec();
+        state.spawnCooldown = calcSpawnIntervalSec(maxNow);
       }
       return;
     }
@@ -248,7 +257,7 @@ export function createGame({ ui, audio, stages }) {
     const gapOk = (nowSec - state.lastSpawnAt) >= state.minGapTwoLane;
     if (state.cards.length < 2 && state.spawnCooldown <= 0 && gapOk) {
       spawnCard();
-      state.spawnCooldown = calcSpawnIntervalSec();
+      state.spawnCooldown = calcSpawnIntervalSec(maxNow);
     }
   }
 

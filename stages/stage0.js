@@ -112,6 +112,10 @@ export function createStage0() {
     unlockNeed: 18,
     clearCount: 30,
     overlapStart: 14,
+    twoLaneSpawnInterval: {
+      start: 3.0,
+      min: 0.8,
+    },
     choices: CHOICES_STAGE0,
     hints: [
       "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 8–12",

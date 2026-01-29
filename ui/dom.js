@@ -209,24 +209,26 @@ function createCardElement(q) {
   }
 
   // Stage3など：Na/Cl/HCO3/Alb
-  if (q && (q.kind === "calc" || q.kind === "judge")) {
-  const itemsHtml = (q.items || []).map(it => {
-    const unit = it.unit ? ` <span class="unit">${it.unit}</span>` : "";
-    return `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span>${unit}</span>`;
-  }).join(`<span class="qSep">/</span>`);
+  if (q && (q.kind === "calc" || q.kind === "judge" || q.kind === "topic")) {
+    const itemsHtml = (q.items || []).map(it => {
+      const unit = it.unit ? ` <span class="unit">${it.unit}</span>` : "";
+      return `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span>${unit}</span>`;
+    }).join(`<span class="qSep">/</span>`);
 
-  const card = document.createElement("div");
-  card.className = "qcard dynamic";
-  card.innerHTML = `
-    <div class="qOne">
-      <span class="qItem"><b>${q.prompt || "計算"}</b></span>
-      <span class="qSep">/</span>
-      ${itemsHtml}
-    </div>
-    <div class="qIcon" aria-hidden="true">🧮</div>
-  `;
-  return card;
-}
+    const icon = q.kind === "topic" ? "🔎" : "🧮";
+
+    const card = document.createElement("div");
+    card.className = "qcard dynamic";
+    card.innerHTML = `
+      <div class="qOne">
+        <span class="qItem"><b>${q.prompt || "計算"}</b></span>
+        <span class="qSep">/</span>
+        ${itemsHtml}
+      </div>
+      <div class="qIcon" aria-hidden="true">${icon}</div>
+    `;
+    return card;
+  }
 
   // 既存：pH/PaCO2/HCO3（必要ならAG追加）
   const agHtml = q.ag !== undefined

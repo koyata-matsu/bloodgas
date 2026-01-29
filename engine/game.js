@@ -39,6 +39,33 @@ export function createGame({ ui, audio, stages }) {
   let cbFeedback = () => {};
   let cbJudgeFX = () => {};
   let cbResult = () => {};
+  let cbLog = () => {};
+
+  function logEvent(payload) {
+    cbLog({
+      stageId: state.stage.id,
+      stageName: state.stage.name,
+      ...payload,
+    });
+  }
+
+  function getChoiceLabelsForQuestion(q) {
+    if (typeof state.stage.getChoices === "function") {
+      const choicePayload = state.stage.getChoices(q);
+      if (Array.isArray(choicePayload)) return choicePayload;
+      if (choicePayload?.labels) return choicePayload.labels;
+    }
+    if (Array.isArray(state.stage.choices)) return state.stage.choices;
+    return null;
+  }
+
+  function formatChoiceLabel(choiceIdx, labels) {
+    if (!labels) return "";
+    if (Array.isArray(choiceIdx)) {
+      return choiceIdx.map(idx => labels[idx]).filter(Boolean).join(" / ");
+    }
+    return labels[choiceIdx] ?? "";
+  }
 
   function getMaxConcurrent() {
     return state.stage.maxConcurrent
@@ -302,7 +329,19 @@ export function createGame({ ui, audio, stages }) {
     });
   }
 
-  function handleWrong(text, loss) {
+  function handleWrong(text, loss, meta = {}) {
+    if (meta?.q) {
+      logEvent({
+        type: "question",
+        outcome: meta.outcome || "wrong",
+        elapsedSec: meta.elapsedSec ?? null,
+        q: meta.q,
+        choiceIdx: meta.choiceIdx ?? null,
+        choiceLabel: meta.choiceLabel ?? "",
+        correctLabel: meta.correctLabel ?? "",
+        explanation: meta.explanation ?? "",
+      });
+    }
     state.misses += 1;
     cbSfx("bad");
     cbJudgeFX(false);
@@ -340,12 +379,23 @@ export function createGame({ ui, audio, stages }) {
 
     const result = state.stage.checkChoice(card.q, choiceIdx);
     let alreadyHandled = false;
+    const labels = getChoiceLabelsForQuestion(card.q);
+    const choiceLabel = formatChoiceLabel(choiceIdx, labels);
+    const elapsedSec = (performance.now() - card.bornAt) / 1000;
     if (typeof result === "object") {
       if (!result.correct) {
         const feedbackText = result.explanation
           ? `ミス！ ${result.explanation}`
           : (result.feedback || "ミス！");
-        handleWrong(feedbackText, 10);
+        handleWrong(feedbackText, 10, {
+          outcome: "wrong",
+          q: card.q,
+          elapsedSec,
+          choiceIdx,
+          choiceLabel,
+          correctLabel: result.correctLabel || "",
+          explanation: result.explanation || "",
+        });
         if (result.correctLabel || result.explanation) {
           ui.showWrongModal({
             answer: result.correctLabel || "正解",
@@ -372,7 +422,13 @@ export function createGame({ ui, audio, stages }) {
         return;
       }
     } else if (!result) {
-      handleWrong("ミス！", 10);
+      handleWrong("ミス！", 10, {
+        outcome: "wrong",
+        q: card.q,
+        elapsedSec,
+        choiceIdx,
+        choiceLabel,
+      });
       return;
     }
 
@@ -381,13 +437,23 @@ export function createGame({ ui, audio, stages }) {
     // complete card
     state.correct += 1;
 
-    const elapsed = (performance.now() - card.bornAt) / 1000;
-    const timeLeft = Math.max(0, state.timeLimitSec - elapsed);
+    const timeLeft = Math.max(0, state.timeLimitSec - elapsedSec);
 
     setHP(state.hp + (5 + 0.9 * timeLeft), "gain");
     state.timeLimitSec = Math.max(4.5, state.timeLimitSec - 0.55);
 
     removeCardAt(tIdx);
+
+    logEvent({
+      type: "question",
+      outcome: "correct",
+      elapsedSec,
+      q: card.q,
+      choiceIdx,
+      choiceLabel,
+      correctLabel: result?.correctLabel || "",
+      explanation: result?.explanation || "",
+    });
 
     const unlocked = unlockNextIfNeeded();
     setHUD();
@@ -443,7 +509,12 @@ export function createGame({ ui, audio, stages }) {
     if (tIdx >= 0) {
       const t = state.cards[tIdx];
       if (effectiveX(t) <= ui.layout.MISS_X) {
-        handleWrong("取り逃し！", 14);
+        const elapsedSec = (performance.now() - t.bornAt) / 1000;
+        handleWrong("取り逃し！", 14, {
+          outcome: "miss",
+          q: t.q,
+          elapsedSec,
+        });
       }
     }
 
@@ -515,5 +586,6 @@ export function createGame({ ui, audio, stages }) {
     onFeedback: (fn) => (cbFeedback = fn),
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
+    onLog: (fn) => (cbLog = fn),
   };
 }

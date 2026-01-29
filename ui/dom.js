@@ -56,6 +56,7 @@ export function createUI() {
     retryBtn: $("retryBtn"),
     nextBtn: $("nextBtn"),
     menuBtn: $("menuBtn"),
+    downloadLogBtn: $("downloadLogBtn"),
 
     wrongModal: $("wrongModal"),
     wrongAnswer: $("wrongAnswer"),
@@ -92,6 +93,7 @@ export function createUI() {
   let onResultRetry = () => {};
   let onResultNext = () => {};
   let onResultMenu = () => {};
+  let onDownloadLog = () => {};
 
   function showScreen(name) {
     el.screenMenu?.classList.toggle("hidden", name !== "menu");
@@ -416,6 +418,7 @@ export function createUI() {
   el.retryBtn?.addEventListener("click", () => onResultRetry());
   el.nextBtn?.addEventListener("click", () => onResultNext());
   el.menuBtn?.addEventListener("click", () => onResultMenu());
+  el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
   el.wrongCloseBtn?.addEventListener("click", () => hideWrongModal());
   el.wrongModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideWrongModal());
@@ -467,5 +470,6 @@ export function createUI() {
     onResultRetry: (fn) => (onResultRetry = fn),
     onResultNextStage: (fn) => (onResultNext = fn),
     onResultMenu: (fn) => (onResultMenu = fn),
+    onDownloadLog: (fn) => (onDownloadLog = fn),
   };
 }

@@ -82,7 +82,9 @@ function makeQ_type2_corrAG(){
       { k:"AG", v: ag.toFixed(1) },
       { k:"Alb", v: alb.toFixed(1), unit:"g/dL" },
     ],
-    options, correctIndex
+    options,
+    correctIndex,
+    speedMult: 0.85,
   };
 }
 
@@ -123,11 +125,11 @@ export function createStage3(){
   let idx = 0;
 
   return {
-    id: 3,
+    id: 4,
     name: "ステージ3：AG計算と補正",
     unlockNeed: 18,      // ★18問で次ステージ解放
     clearCount: 30,
-    overlapStart: 14,
+    overlapStart: 15,
 
     // 2レーンなし（速度のみ上昇）
     maxConcurrent(){

@@ -370,7 +370,10 @@ export function createGame({ ui, audio, stages }) {
     const baseSpeed = dist / Math.max(0.001, state.timeLimitSec);
     const speed = baseSpeed * mult;
 
-    for (const c of state.cards) c.x -= speed * dt;
+    for (const c of state.cards) {
+      const cardSpeedMult = Number.isFinite(c.q?.speedMult) ? c.q.speedMult : 1.0;
+      c.x -= speed * dt * cardSpeedMult;
+    }
 
     // miss check
     const tIdx = pickTargetIndex(state.cards);

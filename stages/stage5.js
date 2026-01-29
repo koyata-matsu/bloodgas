@@ -37,7 +37,7 @@ export function createStage5() {
     needsComp: false,
     choices: CHOICES_STAGE5,
     hints: [
-      "正常値: AG 8–12 / HCO₃⁻ 22–26",
+      "正常値: AG 10–14 / HCO₃⁻ 22–26",
       "計算式: 病態の分類が先（AG開大/非開大、呼吸性か代謝性か）",
       "覚える: 病態ごとの最初の検査を1つずつ覚える",
     ],

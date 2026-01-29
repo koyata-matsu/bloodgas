@@ -29,7 +29,7 @@ function predPaCO2(hco3) {
 }
 
 function getAgStatus(ag) {
-  return ag > 12 ? "AG高値" : "正常AG";
+  return ag > 14 ? "AG高値" : "正常AG";
 }
 
 function getCompStatus(actual, predicted) {
@@ -41,7 +41,7 @@ function getCompStatus(actual, predicted) {
 function makeBank() {
   const bank = [];
   const push = (ph, paco2, hco3, ag, ans) => bank.push({ ph, paco2, hco3, ag, ans });
-  const normalAg = () => randInt(8, 12);
+  const normalAg = () => randInt(10, 14);
   const highAg = () => randInt(16, 28);
 
   // ---- Metabolic Acidosis ----
@@ -112,7 +112,7 @@ export function createStage2() {
 
     choices: CHOICES_STAGE2,
     hints: [
-      "正常値: AG 8–12 / HCO₃⁻ 22–26 / PaCO₂ 35–45",
+      "正常値: AG 10–14 / HCO₃⁻ 22–26 / PaCO₂ 35–45",
       "計算式: 予測PaCO₂ = HCO₃⁻ + 15",
       "覚える: 実測PaCO₂が予測より高い=呼吸性アシドーシス合併 / 低い=呼吸性アルカローシス合併",
     ],

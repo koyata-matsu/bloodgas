@@ -13,7 +13,7 @@ function calcAG(na, cl, hco3){
   return na - (cl + hco3);
 }
 function calcCorrAG(ag, alb){
-  return ag + 2.5 * (4.0 - alb);
+  return ag + 2.5 * Math.max(0, 4.0 - alb);
 }
 function calcCorrHCO3(hco3, corrAg){
   return hco3 + (corrAg - BASE_AG);
@@ -132,10 +132,10 @@ export function createStage3(){
         <h3>ステージ3：AG計算と補正</h3>
         <div class="oneBlock">
           <div><b>① AG = Na − (Cl + HCO₃)</b></div>
-          <div><b>② 補正AG = AG + 2.5 × (4.0 − Alb)</b></div>
+          <div><b>② 補正AG = AG + 2.5 × max(0, 4.0 − Alb)</b></div>
           <div><b>③ 補正HCO₃ = HCO₃ + (補正AG − 12)</b></div>
         </div>
-        <p class="muted">（Alb=4.0の「補正不要」も出る）</p>
+        <p class="muted">（Alb=4.0の「補正不要」やAlb&gt;4.0の「補正なし」も出る）</p>
       </div>
     `,
     startDesc: "3パターン（AG / 補正AG / 補正HCO3）を4択で計算！",

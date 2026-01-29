@@ -7,6 +7,18 @@ const CHOICES_STAGE1 = [
   "呼吸性アルカローシス",
 ];
 
+const NORMALS = {
+  ph: [7.35, 7.45],
+  paco2: [35, 45],
+  hco3: [22, 26],
+};
+
+function dir(value, [min, max]) {
+  if (value < min) return "低下";
+  if (value > max) return "上昇";
+  return "正常";
+}
+
 function makeBank100() {
   const bank = [];
   const push = (ph, paco2, hco3, ans) => bank.push({ ph, paco2, hco3, ans });
@@ -42,6 +54,11 @@ export function createStage1() {
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE1,
+    hints: [
+      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26",
+      "計算式: まずpHでアシドーシス/アルカローシス → 一致するPaCO₂ or HCO₃⁻で主病態判定",
+      "覚える: pH↓=アシドーシス / pH↑=アルカローシス",
+    ],
 
     lessonHTML: `
       <div class="lessonBox">
@@ -85,7 +102,18 @@ export function createStage1() {
     },
 
     checkChoice(q, choiceIdx) {
-      return choiceIdx === q.ans;
+      const correct = choiceIdx === q.ans;
+      const phDir = dir(q.ph, NORMALS.ph);
+      const co2Dir = dir(q.paco2, NORMALS.paco2);
+      const hco3Dir = dir(q.hco3, NORMALS.hco3);
+      const label = CHOICES_STAGE1[q.ans];
+      const explanation = `pH${phDir}で${label.includes("アシドーシス") ? "アシドーシス" : "アルカローシス"}。` +
+        `PaCO₂${co2Dir} / HCO₃⁻${hco3Dir}より${label}。`;
+      return {
+        correct,
+        explanation,
+        correctLabel: label,
+      };
     },
   };
 }

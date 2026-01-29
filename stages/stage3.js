@@ -63,7 +63,9 @@ function makeQ_type1_AG(){
       { k:"Cl", v: String(cl) },
       { k:"HCO3", v: String(hco3) },
     ],
-    options, correctIndex
+    options, correctIndex,
+    correctValue: ag,
+    calc: { na, cl, hco3 },
   };
 }
 
@@ -84,6 +86,8 @@ function makeQ_type2_corrAG(){
     ],
     options,
     correctIndex,
+    correctValue: corrAg,
+    calc: { ag, alb },
     speedMult: 0.85,
   };
 }
@@ -109,7 +113,8 @@ function makeQ_type3_corrHCO3(){
       { k:"補正AG", v: corrAg.toFixed(1) },
       { k:"HCO3", v: hco3.toFixed(1) },
     ],
-    options, correctIndex
+    options, correctIndex,
+    correctValue: corrHco3,
   };
 }
 
@@ -130,6 +135,11 @@ export function createStage3(){
     unlockNeed: 18,      // ★18問で次ステージ解放
     clearCount: 30,
     overlapStart: 15,
+    hints: [
+      "正常値: AG 8–12 / Alb 4.0 / HCO₃⁻ 22–26",
+      "計算式: AG=Na-(Cl+HCO₃⁻)、補正AG=AG+2.5×(4.0−Alb)、補正HCO₃=HCO₃⁻+(補正AG−12)",
+      "覚える: 補正HCO₃が22–26なら純粋、＜22で非開大型合併、＞26で代謝性アルカローシス合併",
+    ],
 
     // 2レーンなし（速度のみ上昇）
     maxConcurrent(){
@@ -181,7 +191,28 @@ export function createStage3(){
     },
 
     checkChoice(q, choiceIdx){
-      return choiceIdx === q.correctIndex;
+      const correct = choiceIdx === q.correctIndex;
+      let explanation = "";
+      let correctLabel = "";
+      if (q.kind === "calc" && q.prompt === "AGは？") {
+        const calc = q.calc || {};
+        explanation = `AG=${calc.na}-(${calc.cl}+${calc.hco3})=${q.correctValue.toFixed(1)}。`;
+        correctLabel = q.options[q.correctIndex].toFixed(1);
+      } else if (q.kind === "calc") {
+        const calc = q.calc || {};
+        explanation = `補正AG=${calc.ag.toFixed(1)}+2.5×(4.0-${calc.alb.toFixed(1)})=${q.correctValue.toFixed(1)}。`;
+        correctLabel = q.options[q.correctIndex].toFixed(1);
+      } else {
+        const corr = q.correctValue;
+        const label = q.options[q.correctIndex];
+        explanation = `補正HCO₃=${corr.toFixed(1)}なので「${label}」。`;
+        correctLabel = label;
+      }
+      return {
+        correct,
+        explanation,
+        correctLabel,
+      };
     },
   };
 }

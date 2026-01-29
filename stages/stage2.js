@@ -28,6 +28,16 @@ function predPaCO2(hco3) {
   return hco3 + 15;
 }
 
+function getAgStatus(ag) {
+  return ag > 12 ? "AG高値" : "正常AG";
+}
+
+function getCompStatus(actual, predicted) {
+  if (actual > predicted + TOL) return "呼吸性アシドーシス合併";
+  if (actual < predicted - TOL) return "呼吸性アルカローシス合併";
+  return "合併なし";
+}
+
 function makeBank() {
   const bank = [];
   const push = (ph, paco2, hco3, ag, ans) => bank.push({ ph, paco2, hco3, ag, ans });
@@ -101,6 +111,11 @@ export function createStage2() {
     overlapStart: 14,
 
     choices: CHOICES_STAGE2,
+    hints: [
+      "正常値: AG 8–12 / HCO₃⁻ 22–26 / PaCO₂ 35–45",
+      "計算式: 予測PaCO₂ = HCO₃⁻ + 15",
+      "覚える: 実測PaCO₂が予測より高い=呼吸性アシドーシス合併 / 低い=呼吸性アルカローシス合併",
+    ],
 
     // 10問目以降から2レーン
     maxConcurrent(correct, spawnedCount) {
@@ -146,7 +161,18 @@ export function createStage2() {
     },
 
     checkChoice(q, choiceIdx) {
-      return choiceIdx === q.ans;
+      const correct = choiceIdx === q.ans;
+      const pred = predPaCO2(q.hco3);
+      const comp = getCompStatus(q.paco2, pred);
+      const agStatus = getAgStatus(q.ag);
+      const label = CHOICES_STAGE2[q.ans];
+      const explanation = `予測PaCO₂=${q.hco3}+15=${pred}、実測${q.paco2}で${comp}。` +
+        `AG${q.ag}で${agStatus}。`;
+      return {
+        correct,
+        explanation,
+        correctLabel: label,
+      };
     },
   };
 }

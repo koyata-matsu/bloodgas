@@ -613,6 +613,38 @@ function checkExactMatch(selected, correct, labels) {
   return sameLabelSet(selectedSet, correctSet);
 }
 
+function formatList(list) {
+  return list.join("・");
+}
+
+function buildStepInfo(q) {
+  if (q.step === 0) {
+    const label = formatList(q.abnormalities);
+    return {
+      correctLabel: label,
+      explanation: `酸塩基異常は「${label}」。`,
+    };
+  }
+  if (q.step === 1) {
+    const label = formatList(q.correctTests);
+    return {
+      correctLabel: label,
+      explanation: `追加検査は「${label}」を優先。`,
+    };
+  }
+  if (q.step === 2) {
+    return {
+      correctLabel: "次へ",
+      explanation: "現病歴を確認して次へ。",
+    };
+  }
+  const label = formatList(q.pathologies);
+  return {
+    correctLabel: label,
+    explanation: `病態は「${label}」。`,
+  };
+}
+
 export function createStage6() {
   let bank = makeBank();
   let idx = 0;
@@ -624,6 +656,11 @@ export function createStage6() {
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
+    hints: [
+      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 8–12",
+      "計算式: AG=Na-(Cl+HCO₃⁻)、補正AG=AG+2.5×(4.0−Alb)",
+      "覚える: 病態→追加検査→病歴→原因推論の流れを固定する",
+    ],
 
     lessonHTML: `
       <div class="lessonBox">
@@ -697,26 +734,38 @@ export function createStage6() {
     checkChoice(q, selection) {
       const stepOptions = getStepOptions(q);
       const selected = normalizeSelection(selection);
+      const info = buildStepInfo(q);
 
       if (q.step === 0) {
         return {
           correct: checkExactMatch(selected, q.abnormalities, stepOptions),
           done: false,
+          explanation: info.explanation,
+          correctLabel: info.correctLabel,
         };
       }
       if (q.step === 1) {
         return {
           correct: checkExactMatch(selected, q.correctTests, stepOptions),
           done: false,
+          explanation: info.explanation,
+          correctLabel: info.correctLabel,
         };
       }
       if (q.step === 2) {
-        return { correct: selected[0] === 0, done: false };
+        return {
+          correct: selected[0] === 0,
+          done: false,
+          explanation: info.explanation,
+          correctLabel: info.correctLabel,
+        };
       }
 
       return {
         correct: checkExactMatch(selected, q.pathologies, stepOptions),
         done: true,
+        explanation: info.explanation,
+        correctLabel: info.correctLabel,
       };
     },
   };

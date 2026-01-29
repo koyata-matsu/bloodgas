@@ -42,6 +42,9 @@ export function createUI() {
     startTitle: $("startTitle"),
     startDesc: $("startDesc"),
 
+    hintArea: $("hintArea"),
+    hintList: $("hintList"),
+
     judgeFx: $("judgeFx"),
 
     resultModal: $("resultModal"),
@@ -53,6 +56,11 @@ export function createUI() {
     retryBtn: $("retryBtn"),
     nextBtn: $("nextBtn"),
     menuBtn: $("menuBtn"),
+
+    wrongModal: $("wrongModal"),
+    wrongAnswer: $("wrongAnswer"),
+    wrongExplain: $("wrongExplain"),
+    wrongCloseBtn: $("wrongCloseBtn"),
   };
 
   // constants shared with engine/layout.js
@@ -185,6 +193,22 @@ export function createUI() {
       b.addEventListener("click", () => onChoice(i));
       el.choices.appendChild(b);
     });
+  }
+
+  function setHints(hints, show) {
+    if (!el.hintArea || !el.hintList) return;
+    if (!Array.isArray(hints) || hints.length === 0) {
+      el.hintArea.classList.add("hidden");
+      el.hintList.innerHTML = "";
+      return;
+    }
+    el.hintList.innerHTML = "";
+    hints.forEach((text) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      el.hintList.appendChild(li);
+    });
+    el.hintArea.classList.toggle("hidden", !show);
   }
 
   function renderMultiChoices(labels, submitLabel = "決定") {
@@ -355,6 +379,17 @@ export function createUI() {
     el.resultModal?.classList.add("hidden");
   }
 
+  function showWrongModal(payload) {
+    if (!el.wrongModal) return;
+    if (el.wrongAnswer) el.wrongAnswer.textContent = payload?.answer || "-";
+    if (el.wrongExplain) el.wrongExplain.textContent = payload?.explanation || "-";
+    el.wrongModal.classList.remove("hidden");
+  }
+
+  function hideWrongModal() {
+    el.wrongModal?.classList.add("hidden");
+  }
+
   // events
   el.stageBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -382,6 +417,8 @@ export function createUI() {
   el.nextBtn?.addEventListener("click", () => onResultNext());
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
+  el.wrongCloseBtn?.addEventListener("click", () => hideWrongModal());
+  el.wrongModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideWrongModal());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -406,12 +443,15 @@ export function createUI() {
     toggleNormalsPanel,
     setPauseLabel,
     renderChoices,
+    setHints,
     renderMultiChoices,
     showCompButtons,
     createCardElement,
     updateCardElement,
     showResult,
     hideResult,
+    showWrongModal,
+    hideWrongModal,
 
     onSelectStage: (fn) => (onSelectStage = fn),
     onGoLesson: (fn) => (onGoLesson = fn),

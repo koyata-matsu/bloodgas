@@ -48,50 +48,6 @@ const ITEMS = [
     },
   },
   {
-    label: "Na",
-    unit: "mEq/L",
-    decimals: 0,
-    step: 1,
-    ranges: {
-      low: [120, 134],
-      normal: [135, 145],
-      high: [146, 160],
-    },
-  },
-  {
-    label: "K",
-    unit: "mEq/L",
-    decimals: 1,
-    step: 0.1,
-    ranges: {
-      low: [2.5, 3.4],
-      normal: [3.5, 5.0],
-      high: [5.1, 6.5],
-    },
-  },
-  {
-    label: "Cl",
-    unit: "mEq/L",
-    decimals: 0,
-    step: 1,
-    ranges: {
-      low: [85, 97],
-      normal: [98, 106],
-      high: [107, 120],
-    },
-  },
-  {
-    label: "Alb",
-    unit: "g/dL",
-    decimals: 1,
-    step: 0.1,
-    ranges: {
-      low: [2.0, 3.4],
-      normal: [3.5, 5.0],
-      high: [5.1, 6.0],
-    },
-  },
-  {
     label: "AG",
     unit: "mEq/L",
     decimals: 0,
@@ -170,10 +126,6 @@ export function createStage0() {
           <div><b>PaCO₂</b> 35–45 mmHg</div>
           <div><b>PaO₂</b> 80–100 mmHg</div>
           <div><b>HCO₃⁻</b> 22–26 mEq/L</div>
-          <div><b>Na</b> 135–145 mEq/L</div>
-          <div><b>K</b> 3.5–5.0 mEq/L</div>
-          <div><b>Cl</b> 98–106 mEq/L</div>
-          <div><b>Alb</b> 3.5–5.0 g/dL</div>
           <div><b>AG</b> 8–12 mEq/L</div>
         </div>
       </div>

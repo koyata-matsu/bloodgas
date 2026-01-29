@@ -83,6 +83,12 @@ export function createGame({ ui, audio, stages }) {
     ui.renderChoices(["..."]);
   }
 
+  function updateHints() {
+    const hints = state.stage.hints || [];
+    const show = state.spawnedCount <= 10;
+    ui.setHints(hints, show);
+  }
+
   function forceRelayoutAll() {
     const maxNow = getMaxConcurrent();
     const tIdx = pickTargetIndex(state.cards);
@@ -171,11 +177,13 @@ export function createGame({ ui, audio, stages }) {
     cbBgmMode("early");
 
     ui.showCompButtons(false);
+    ui.hideWrongModal();
 
     setHP(state.hp, null);
     setHUD();
     cbFeedback("");
     ui.setLaneHeight(getMaxConcurrent());
+    updateHints();
 
     // ★ここでchoicesを安全に描画
     updateChoicesForTarget();
@@ -210,6 +218,7 @@ export function createGame({ ui, audio, stages }) {
 
     cbBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
     forceRelayoutAll();
+    updateHints();
 
     // ★ターゲットが変わるので必ず更新
     updateChoicesForTarget();
@@ -324,11 +333,23 @@ export function createGame({ ui, audio, stages }) {
     let alreadyHandled = false;
     if (typeof result === "object") {
       if (!result.correct) {
-        handleWrong(result.feedback || "ミス！", 10);
+        const feedbackText = result.explanation
+          ? `ミス！ ${result.explanation}`
+          : (result.feedback || "ミス！");
+        handleWrong(feedbackText, 10);
+        if (result.correctLabel || result.explanation) {
+          ui.showWrongModal({
+            answer: result.correctLabel || "正解",
+            explanation: result.explanation || "解説はありません。",
+          });
+        }
         return;
       }
 
-      handleCorrect(result.feedback || "OK！");
+      const okText = result.explanation
+        ? `OK！ ${result.explanation}`
+        : (result.feedback || "OK！");
+      handleCorrect(okText);
       alreadyHandled = true;
       if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
         state.stage.advanceQuestion(card.q);

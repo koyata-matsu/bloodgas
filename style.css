@@ -229,6 +229,17 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 
 /* Choices */
 .panel { display:grid; gap:10px; }
+.hintArea {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e6e6ef;
+  background: #fffdf7;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.hintArea.hidden { display: none; }
+.hintTitle { font-weight: 700; margin-bottom: 4px; color: #92400e; }
+.hintList { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .choices { display:grid; gap:10px; }
 .choiceBtn { width:100%; padding:12px; border-radius:12px; border:1px solid #e6e6ef; background:#fff; cursor:pointer; font-size:16px; text-align:left; }
 .choiceBtn:hover { background:#fafafe; }
@@ -309,5 +320,8 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 .scoreSub{ margin-top: 6px; opacity:.75; }
 .unlockMsg{ margin-top: 12px; font-weight: 700; }
 .modalBtns{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px; }
+.wrongAnswerLabel { font-weight: 700; margin-top: 6px; color: #6b7280; }
+.wrongAnswer { font-size: 18px; font-weight: 700; margin: 4px 0 8px; }
+.wrongExplain { line-height: 1.6; color: #374151; }
 
 audio{ display:none; }

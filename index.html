@@ -131,6 +131,11 @@
       </div>
 
       <div class="panel">
+        <div id="hintArea" class="hintArea hidden">
+          <div class="hintTitle">ヒント（最初の10問）</div>
+          <ul id="hintList" class="hintList"></ul>
+        </div>
+
         <div class="choices" id="choices"></div>
 
         <!-- Stage2用（使わないが残してもOK） -->
@@ -170,6 +175,24 @@
           <button id="retryBtn" class="btn">もう一回</button>
           <button id="nextBtn" class="btn" disabled>次ステージへ</button>
           <button id="menuBtn" class="btn ghost">メニューへ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="wrongModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modalBackdrop"></div>
+      <div class="modalCard">
+        <div class="modalTop">
+          <div class="rankTitle">不正解</div>
+        </div>
+        <div class="modalBody">
+          <div class="wrongAnswerLabel">正解</div>
+          <div id="wrongAnswer" class="wrongAnswer">-</div>
+          <div class="wrongAnswerLabel">解説</div>
+          <div id="wrongExplain" class="wrongExplain">-</div>
+        </div>
+        <div class="modalBtns">
+          <button id="wrongCloseBtn" class="btn">閉じる</button>
         </div>
       </div>
     </div>

@@ -60,6 +60,10 @@ const ITEMS = [
   },
 ];
 
+function getItemByLabel(label) {
+  return ITEMS.find((item) => item.label === label);
+}
+
 function randStep(min, max, step) {
   const scale = Math.round(1 / step);
   const minInt = Math.round(min * scale);
@@ -109,6 +113,11 @@ export function createStage0() {
     clearCount: 30,
     overlapStart: 14,
     choices: CHOICES_STAGE0,
+    hints: [
+      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 8–12",
+      "計算式: なし（基準範囲と比較して判定）",
+      "覚える: 正常値のレンジを即答できるようにする",
+    ],
 
     lessonHTML: `
       <div class="lessonBox">
@@ -142,7 +151,18 @@ export function createStage0() {
     },
 
     checkChoice(q, choiceIdx) {
-      return choiceIdx === q.ans;
+      const correct = choiceIdx === q.ans;
+      const item = getItemByLabel(q.item);
+      const unit = item?.unit ? ` ${item.unit}` : "";
+      const normalRange = item ? `${item.ranges.normal[0]}–${item.ranges.normal[1]}${unit}` : "";
+      const explanation = item
+        ? `${q.item}正常値は${normalRange}。提示値${q.value}${unit}は${CHOICES_STAGE0[q.ans]}。`
+        : "正常値レンジと比較して判定。";
+      return {
+        correct,
+        explanation,
+        correctLabel: CHOICES_STAGE0[q.ans],
+      };
     },
   };
 }

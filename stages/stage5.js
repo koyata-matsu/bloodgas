@@ -16,6 +16,14 @@ const QUESTION_BANK = [
   { condition: "呼吸性アルカローシス", ans: 4 },
 ];
 
+const CONDITION_EXPLAIN = {
+  "AG開大型代謝性アシドーシス": "乳酸・浸透圧ギャップ・血糖/尿ケトンを優先。",
+  "非開大型（正常AG）代謝性アシドーシス": "尿中AGや尿中浸透圧で腎性/腸管性を評価。",
+  "代謝性アルカローシス": "尿Clで嘔吐/利尿薬などの反応性を確認。",
+  "呼吸性アシドーシス": "換気低下の原因（COPD・肺炎・中枢抑制）を探す。",
+  "呼吸性アルカローシス": "低酸素・敗血症・過換気の鑑別を急ぐ。",
+};
+
 export function createStage5() {
   let bank = shuffle([...QUESTION_BANK]);
   let idx = 0;
@@ -28,6 +36,11 @@ export function createStage5() {
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE5,
+    hints: [
+      "正常値: AG 8–12 / HCO₃⁻ 22–26",
+      "計算式: 病態の分類が先（AG開大/非開大、呼吸性か代謝性か）",
+      "覚える: 病態ごとの最初の検査を1つずつ覚える",
+    ],
 
     lessonHTML: `
       <div class="lessonBox">
@@ -100,7 +113,14 @@ export function createStage5() {
     },
 
     checkChoice(q, choiceIdx) {
-      return choiceIdx === q.ans;
+      const correct = choiceIdx === q.ans;
+      const label = CHOICES_STAGE5[q.ans];
+      const explanation = CONDITION_EXPLAIN[q.items[0].v] || "病態ごとの優先検査を確認。";
+      return {
+        correct,
+        explanation,
+        correctLabel: label,
+      };
     },
   };
 }

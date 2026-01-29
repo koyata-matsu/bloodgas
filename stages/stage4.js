@@ -69,6 +69,11 @@ export function createStage4() {
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE4,
+    hints: [
+      "正常値: HCO₃⁻ 22–26 / PaCO₂ 35–45",
+      "計算式: なし（HCO₃⁻が正常なら急性、ずれていれば慢性）",
+      "覚える: 呼吸性アシドーシスはHCO₃⁻↑で慢性、呼吸性アルカローシスはHCO₃⁻↓で慢性",
+    ],
 
     lessonHTML: `
       <div class="lessonBox">
@@ -113,7 +118,17 @@ export function createStage4() {
     },
 
     checkChoice(q, choiceIdx) {
-      return choiceIdx === q.ans;
+      const correct = choiceIdx === q.ans;
+      const isAcid = q.paco2 > 45;
+      const isChronic = !isNormalHco3(q.hco3);
+      const label = CHOICES_STAGE4[q.ans];
+      const explanation = `PaCO₂${isAcid ? "高値" : "低値"}で${isAcid ? "呼吸性アシドーシス" : "呼吸性アルカローシス"}。` +
+        `HCO₃⁻が${isChronic ? "正常域外" : "正常域"}なので${isChronic ? "慢性" : "急性"}。`;
+      return {
+        correct,
+        explanation,
+        correctLabel: label,
+      };
     },
   };
 }

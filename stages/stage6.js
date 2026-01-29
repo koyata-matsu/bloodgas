@@ -557,14 +557,14 @@ function sameLabelSet(a, b) {
 
 function applyStep(q) {
   const steps = [
-    { title: "② 病態をすべて選択", prompt: "酸塩基異常をすべて選択" },
-    { title: "③ 追加検査", prompt: "この病態で追加で確認したい検査はどれ？" },
-    { title: "④ 現病歴", prompt: "現病歴を確認して次へ" },
-    { title: "⑤ 病態を当てる", prompt: "この患者に当てはまる病態を選択せよ。" },
+    { title: "① 病態をすべて選択", prompt: "酸塩基異常をすべて選択", stepLabel: "1/3" },
+    { title: "② 追加検査", prompt: "この病態で追加で確認したい検査はどれ？", stepLabel: "2/3" },
+    { title: "③ 病態を当てる", prompt: "この患者に当てはまる病態を選択せよ。", stepLabel: "3/3" },
   ];
   const step = steps[q.step] || steps[0];
   q.stepTitle = step.title;
   q.prompt = step.prompt;
+  q.stepLabel = step.stepLabel;
   q.showHistory = q.step >= 2;
 }
 
@@ -600,8 +600,6 @@ function getStepOptions(q) {
       return ABNORMALITY_CHOICES;
     case 1:
       return q.testsOptions;
-    case 2:
-      return ["次へ"];
     default:
       return PATHOLOGY_CHOICES;
   }
@@ -632,12 +630,6 @@ function buildStepInfo(q) {
       explanation: `追加検査は「${label}」を優先。`,
     };
   }
-  if (q.step === 2) {
-    return {
-      correctLabel: "次へ",
-      explanation: "現病歴を確認して次へ。",
-    };
-  }
   const label = formatList(q.pathologies);
   return {
     correctLabel: label,
@@ -657,7 +649,7 @@ export function createStage6() {
     overlapStart: 14,
     needsComp: false,
     hints: [
-      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 8–12",
+      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 10–14",
       "計算式: AG=Na-(Cl+HCO₃⁻)、補正AG=AG+2.5×(4.0−Alb)",
       "覚える: 病態→追加検査→病歴→原因推論の流れを固定する",
     ],
@@ -703,6 +695,12 @@ export function createStage6() {
     maxConcurrent() {
       return 1;
     },
+    staticQuestion: true,
+    questionMode: true,
+    centerCards: true,
+    timeLimitStart: 50,
+    timeLimitMin: 20,
+    timeLimitDecay: 2,
 
     nextQuestion() {
       if (idx >= bank.length) {
@@ -714,7 +712,7 @@ export function createStage6() {
 
     getChoices(q) {
       const labels = getStepOptions(q);
-      if (q.step === 0 || q.step === 3) {
+      if (q.step === 0 || q.step === 2) {
         return { labels, multi: true, submitLabel: "決定" };
       }
       if (q.step === 1) {
@@ -727,7 +725,7 @@ export function createStage6() {
     },
 
     advanceQuestion(q) {
-      q.step = Math.min(q.step + 1, 3);
+      q.step = Math.min(q.step + 1, 2);
       applyStep(q);
     },
 
@@ -752,15 +750,6 @@ export function createStage6() {
           correctLabel: info.correctLabel,
         };
       }
-      if (q.step === 2) {
-        return {
-          correct: selected[0] === 0,
-          done: false,
-          explanation: info.explanation,
-          correctLabel: info.correctLabel,
-        };
-      }
-
       return {
         correct: checkExactMatch(selected, q.pathologies, stepOptions),
         done: true,

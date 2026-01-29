@@ -122,9 +122,9 @@ export function createStage3(){
     clearCount: 30,
     overlapStart: 14,
 
-    // 10問目以降2レーン
-    maxConcurrent(correct, spawnedCount){
-      return (correct >= 9 || spawnedCount >= 9) ? 2 : 1;
+    // 2レーンなし（速度のみ上昇）
+    maxConcurrent(){
+      return 1;
     },
 
     lessonHTML: `

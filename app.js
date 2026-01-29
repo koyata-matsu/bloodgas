@@ -28,6 +28,211 @@ const stages = [
 const game = createGame({ ui, audio, stages });
 
 let selectedStageId = 1;
+let activeRunId = null;
+let runStartAt = null;
+let runEvents = [];
+
+const LS_LOG_KEY = "bg_game_logs_v1";
+const LS_LOG_UPLOAD_URL_KEY = "bg_log_upload_url";
+const LS_LOG_LAST_UPLOAD_KEY = "bg_log_last_upload_at";
+const UPLOAD_INTERVAL_MS = 1000 * 60 * 60 * 24;
+const DEFAULT_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwsDePBZyEwAluHo6n3p8XDtuECic04pFljbyZd-kqFS02VX6AIrQ5p3I1L5jpl_AH-/exec";
+
+function loadLogStore() {
+  try {
+    const raw = localStorage.getItem(LS_LOG_KEY);
+    const data = raw ? JSON.parse(raw) : null;
+    if (data && Array.isArray(data.events)) return data;
+  } catch (err) {
+    console.warn("Failed to load logs", err);
+  }
+  return { version: 1, events: [] };
+}
+
+const logStore = loadLogStore();
+
+function saveLogStore() {
+  localStorage.setItem(LS_LOG_KEY, JSON.stringify(logStore));
+}
+
+function startRunSession() {
+  activeRunId = `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+  runStartAt = new Date().toISOString();
+  runEvents = [];
+}
+
+function formatNumber(value, digits = 2) {
+  if (value == null || Number.isNaN(value)) return "";
+  return Number(value).toFixed(digits);
+}
+
+function formatQuestionSummary(q) {
+  if (!q) return "";
+  if (q.kind === "norm") {
+    return `${q.item} ${q.value}${q.unit ? ` ${q.unit}` : ""}`;
+  }
+  if (q.kind === "calc" || q.kind === "judge") {
+    const items = (q.items || [])
+      .map(it => `${it.k}${it.v}${it.unit ? ` ${it.unit}` : ""}`)
+      .join(" / ");
+    return `${q.prompt || "計算"} | ${items}`;
+  }
+  if (q.kind === "case") {
+    return [
+      `pH ${formatNumber(q.ph)}`,
+      `PaCO2 ${q.paco2}`,
+      `HCO3 ${q.hco3}`,
+      `Na ${q.na}`,
+      `Cl ${q.cl}`,
+      `Alb ${formatNumber(q.alb, 1)}`,
+      `AG ${q.ag}`,
+    ].join(" / ");
+  }
+  return [
+    `pH ${formatNumber(q.ph)}`,
+    `PaCO2 ${q.paco2}`,
+    `HCO3 ${q.hco3}`,
+    q.ag !== undefined ? `AG ${q.ag}` : null,
+  ].filter(Boolean).join(" / ");
+}
+
+function recordLogEvent(event) {
+  if (!activeRunId) startRunSession();
+  const withMeta = {
+    runId: activeRunId,
+    timestamp: new Date().toISOString(),
+    uploadedAt: null,
+    ...event,
+  };
+  logStore.events.push(withMeta);
+  runEvents.push(withMeta);
+  saveLogStore();
+}
+
+function buildLogCsv() {
+  const header = [
+    "type",
+    "runId",
+    "timestamp",
+    "stageId",
+    "stageName",
+    "outcome",
+    "elapsedSec",
+    "question",
+    "choice",
+    "correctLabel",
+    "explanation",
+    "correct",
+    "misses",
+    "totalQuestions",
+    "rate",
+    "avgCorrectSec",
+    "runStartAt",
+    "runEndAt",
+    "wrongQuestions",
+  ];
+  const rows = logStore.events.map((event) => ([
+    event.type || "",
+    event.runId || "",
+    event.timestamp || "",
+    event.stageId ?? "",
+    event.stageName || "",
+    event.outcome || "",
+    event.elapsedSec != null ? formatNumber(event.elapsedSec) : "",
+    event.question || "",
+    event.choice || "",
+    event.correctLabel || "",
+    event.explanation || "",
+    event.correct ?? "",
+    event.misses ?? "",
+    event.totalQuestions ?? "",
+    event.rate ?? "",
+    event.avgCorrectSec != null ? formatNumber(event.avgCorrectSec) : "",
+    event.runStartAt || "",
+    event.runEndAt || "",
+    event.wrongQuestions || "",
+  ]));
+  const csvLines = [header, ...rows].map((cols) =>
+    cols.map((col) => `"${String(col).replace(/"/g, "\"\"")}"`).join(",")
+  );
+  return `\uFEFF${csvLines.join("\n")}`;
+}
+
+function downloadLogCsv() {
+  if (!logStore.events.length) {
+    if (typeof ui.flashMessage === "function") {
+      ui.flashMessage("ログがまだありません。");
+    } else {
+      window.alert("ログがまだありません。");
+    }
+    return;
+  }
+  const csv = buildLogCsv();
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `bloodgas_logs_${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function getUploadUrl() {
+  return window.BG_LOG_UPLOAD_URL
+    || localStorage.getItem(LS_LOG_UPLOAD_URL_KEY)
+    || DEFAULT_UPLOAD_URL;
+}
+
+function getLastUploadAt() {
+  const raw = localStorage.getItem(LS_LOG_LAST_UPLOAD_KEY);
+  return raw ? Number(raw) : 0;
+}
+
+function setLastUploadAt(value) {
+  localStorage.setItem(LS_LOG_LAST_UPLOAD_KEY, String(value));
+}
+
+function collectPendingEvents() {
+  return logStore.events.filter(event => !event.uploadedAt);
+}
+
+async function uploadLogsIfDue() {
+  const uploadUrl = getUploadUrl();
+  if (!uploadUrl) return;
+
+  const now = Date.now();
+  const lastUploadAt = getLastUploadAt();
+  if (now - lastUploadAt < UPLOAD_INTERVAL_MS) return;
+
+  const pending = collectPendingEvents();
+  if (!pending.length) return;
+
+  try {
+    const res = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        generatedAt: new Date().toISOString(),
+        source: "bloodgas",
+        events: pending,
+      }),
+    });
+    if (!res.ok) {
+      console.warn("Log upload failed", res.status);
+      return;
+    }
+    const uploadedAt = new Date().toISOString();
+    pending.forEach((event) => {
+      event.uploadedAt = uploadedAt;
+    });
+    setLastUploadAt(now);
+    saveLogStore();
+  } catch (err) {
+    console.warn("Log upload error", err);
+  }
+}
 
 function getUnlockedMax() {
   return 7;
@@ -71,8 +276,11 @@ ui.onGoLesson(() => {
 });
 ui.onBackToMenu(() => ui.showScreen("menu"));
 
+uploadLogsIfDue();
+
 ui.onGoGame(() => {
   ui.showScreen("game");
+  startRunSession();
   game.prepareRun();
 });
 
@@ -86,7 +294,10 @@ ui.onStart(() => {
 ui.onToggleNormals(() => ui.toggleNormalsPanel());
 ui.onPauseToggle(() => game.togglePause());
 
-ui.onRestart(() => game.prepareRun());
+ui.onRestart(() => {
+  startRunSession();
+  game.prepareRun();
+});
 ui.onExit(() => {
   game.stop();
   audio.stopBGM();
@@ -96,6 +307,7 @@ ui.onExit(() => {
 // result modal
 ui.onResultRetry(() => {
   ui.hideResult();
+  startRunSession();
   game.prepareRun();
 });
 
@@ -139,6 +351,21 @@ game.onHUD((hud) => ui.setHUD(hud.stat, hud.sub));
 game.onHP((hp, hpMax, anim) => ui.setHP(hp, hpMax, anim));
 game.onFeedback((text) => ui.setFeedback(text));
 game.onJudgeFX((ok) => ui.showJudge(ok));
+ui.onDownloadLog(() => downloadLogCsv());
+
+game.onLog((payload) => {
+  recordLogEvent({
+    type: payload.type,
+    stageId: payload.stageId,
+    stageName: payload.stageName,
+    outcome: payload.outcome,
+    elapsedSec: payload.elapsedSec,
+    question: formatQuestionSummary(payload.q),
+    choice: payload.choiceLabel || "",
+    correctLabel: payload.correctLabel || "",
+    explanation: payload.explanation || "",
+  });
+});
 
 game.onResult((result) => {
   // 18問到達で解放 or クリアで次解放
@@ -147,6 +374,33 @@ game.onResult((result) => {
 
   // 次ボタンを押せるように
   ui.showResult(result);
+
+  const correctTimes = runEvents
+    .filter(event => event.type === "question" && event.outcome === "correct")
+    .map(event => event.elapsedSec)
+    .filter(value => Number.isFinite(value));
+  const avgCorrectSec = correctTimes.length
+    ? correctTimes.reduce((sum, value) => sum + value, 0) / correctTimes.length
+    : null;
+  const wrongQuestions = runEvents
+    .filter(event => event.type === "question" && event.outcome !== "correct")
+    .map(event => event.question)
+    .filter(Boolean)
+    .join(" | ");
+  recordLogEvent({
+    type: "stage",
+    stageId: result.stageId,
+    stageName: result.stageName,
+    correct: result.correct,
+    misses: result.misses,
+    totalQuestions: result.correct + result.misses,
+    rate: result.rate,
+    avgCorrectSec,
+    runStartAt,
+    runEndAt: new Date().toISOString(),
+    wrongQuestions,
+  });
+  void uploadLogsIfDue();
 });
 
 // init

@@ -58,7 +58,20 @@ export function createGame({ ui, audio, stages }) {
 
     // ★毎問違うchoices（Stage3など）
     if (typeof state.stage.getChoices === "function") {
-      ui.renderChoices(state.stage.getChoices(q));
+      const choicePayload = state.stage.getChoices(q);
+      if (Array.isArray(choicePayload)) {
+        ui.renderChoices(choicePayload);
+        return;
+      }
+      if (choicePayload?.multi) {
+        ui.renderMultiChoices(choicePayload.labels, choicePayload.submitLabel);
+        return;
+      }
+      if (choicePayload?.labels) {
+        ui.renderChoices(choicePayload.labels);
+        return;
+      }
+      ui.renderChoices(["..."]);
       return;
     }
     // ★固定choices（Stage1/2など）
@@ -307,13 +320,33 @@ export function createGame({ ui, audio, stages }) {
 
     const card = state.cards[tIdx];
 
-    const ok = state.stage.checkChoice(card.q, choiceIdx);
-    if (!ok) {
+    const result = state.stage.checkChoice(card.q, choiceIdx);
+    let alreadyHandled = false;
+    if (typeof result === "object") {
+      if (!result.correct) {
+        handleWrong(result.feedback || "ミス！", 10);
+        return;
+      }
+
+      handleCorrect(result.feedback || "OK！");
+      alreadyHandled = true;
+      if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
+        state.stage.advanceQuestion(card.q);
+        ui.updateCardElement(card.el, card.q);
+        updateChoicesForTarget();
+        return;
+      }
+
+      if (result.done === false) {
+        updateChoicesForTarget();
+        return;
+      }
+    } else if (!result) {
       handleWrong("ミス！", 10);
       return;
     }
 
-    handleCorrect();
+    if (!alreadyHandled) handleCorrect();
 
     // complete card
     state.correct += 1;

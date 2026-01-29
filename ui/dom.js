@@ -187,69 +187,147 @@ export function createUI() {
     });
   }
 
+  function renderMultiChoices(labels, submitLabel = "決定") {
+    if (!el.choices) return;
+    el.choices.innerHTML = "";
+    labels.forEach((label, i) => {
+      const wrapper = document.createElement("label");
+      wrapper.className = "choiceCheck";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.value = String(i);
+      const text = document.createElement("span");
+      text.textContent = label;
+      wrapper.appendChild(input);
+      wrapper.appendChild(text);
+      el.choices.appendChild(wrapper);
+    });
+
+    const submit = document.createElement("button");
+    submit.className = "choiceBtn choiceSubmit";
+    submit.type = "button";
+    submit.textContent = submitLabel;
+    submit.addEventListener("click", () => {
+      const selected = [...el.choices.querySelectorAll("input[type='checkbox']:checked")];
+      const indexes = selected.map((node) => Number(node.value));
+      onChoice(indexes);
+    });
+    el.choices.appendChild(submit);
+  }
+
   function showCompButtons(on) {
     if (!el.compChoices) return;
     el.compChoices.classList.toggle("hidden", !on);
   }
 
-function createCardElement(q) {
-  const card = document.createElement("div");
-  card.className = "qcard dynamic";
+  function renderCardInner(card, q) {
+    if (!card) return;
 
-  // Stage0: 正常値判定
-  if (q && q.kind === "norm") {
-    const unit = q.unit ? ` <span class="unit">${q.unit}</span>` : "";
+    // Stage0: 正常値判定
+    if (q && q.kind === "norm") {
+      const unit = q.unit ? ` <span class="unit">${q.unit}</span>` : "";
+      card.innerHTML = `
+        <div class="qOne">
+          <span class="qItem norm"><b>${q.item}</b> <span class="vval">${q.value}</span>${unit}</span>
+        </div>
+        <div class="qIcon" aria-hidden="true">🧪</div>
+      `;
+      return;
+    }
+
+    // Stage3など：Na/Cl/HCO3/Alb
+    if (q && (q.kind === "calc" || q.kind === "judge")) {
+      const itemsHtml = (q.items || []).map(it => {
+        const unit = it.unit ? ` <span class="unit">${it.unit}</span>` : "";
+        return `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span>${unit}</span>`;
+      }).join(`<span class="qSep">/</span>`);
+
+      card.innerHTML = `
+        <div class="qOne">
+          <span class="qItem"><b>${q.prompt || "計算"}</b></span>
+          <span class="qSep">/</span>
+          ${itemsHtml}
+        </div>
+        <div class="qIcon" aria-hidden="true">🧮</div>
+      `;
+      return;
+    }
+
+    if (q && q.kind === "case") {
+      const row1 = `
+        <div class="caseRow">
+          <span class="qItem ph"><b>pH</b> <span class="vph">${Number(q.ph).toFixed(2)}</span></span>
+          <span class="qSep">/</span>
+          <span class="qItem co2"><b>PaCO₂</b> <span class="vpco2">${q.paco2}</span> <span class="unit">mmHg</span></span>
+          <span class="qSep">/</span>
+          <span class="qItem hco3"><b>HCO₃⁻</b> <span class="vhco3">${q.hco3}</span> <span class="unit">mEq/L</span></span>
+        </div>
+      `;
+      const row2 = `
+        <div class="caseRow">
+          <span class="qItem"><b>Na</b> <span>${q.na}</span> <span class="unit">mEq/L</span></span>
+          <span class="qSep">/</span>
+          <span class="qItem"><b>Cl</b> <span>${q.cl}</span> <span class="unit">mEq/L</span></span>
+          <span class="qSep">/</span>
+          <span class="qItem"><b>Alb</b> <span>${Number(q.alb).toFixed(1)}</span> <span class="unit">g/dL</span></span>
+          <span class="qSep">/</span>
+          <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
+        </div>
+      `;
+      const historyHtml = q.showHistory
+        ? `
+          <div class="caseHistory">
+            <div class="caseLabel">現病歴</div>
+            <div>${q.history || "（情報なし）"}</div>
+          </div>
+        `
+        : "";
+      card.innerHTML = `
+        <div class="qOne case">
+          <div class="caseTitle">① 血ガス提示</div>
+          ${row1}
+          ${row2}
+          <div class="caseStep">
+            <div class="caseStepTitle">${q.stepTitle || ""}</div>
+            <div class="casePrompt">${q.prompt || ""}</div>
+          </div>
+          ${historyHtml}
+        </div>
+        <div class="qIcon" aria-hidden="true">🧠</div>
+      `;
+      return;
+    }
+
+    // 既存：pH/PaCO2/HCO3（必要ならAG追加）
+    const agHtml = q.ag !== undefined
+      ? `
+        <span class="qSep">/</span>
+        <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
+      `
+      : "";
     card.innerHTML = `
       <div class="qOne">
-        <span class="qItem norm"><b>${q.item}</b> <span class="vval">${q.value}</span>${unit}</span>
+        <span class="qItem ph"><b>pH</b> <span class="vph">${Number(q.ph).toFixed(2)}</span></span>
+        <span class="qSep">/</span>
+        <span class="qItem co2"><b>PaCO₂</b> <span class="vpco2">${q.paco2}</span> <span class="unit">mmHg</span></span>
+        <span class="qSep">/</span>
+        <span class="qItem hco3"><b>HCO₃⁻</b> <span class="vhco3">${q.hco3}</span> <span class="unit">mEq/L</span></span>
+        ${agHtml}
       </div>
-      <div class="qIcon" aria-hidden="true">🧪</div>
+      <div class="qIcon" aria-hidden="true">🚑</div>
     `;
-    return card;
   }
 
-  // Stage3など：Na/Cl/HCO3/Alb
-  if (q && (q.kind === "calc" || q.kind === "judge" || q.kind === "topic")) {
-    const itemsHtml = (q.items || []).map(it => {
-      const unit = it.unit ? ` <span class="unit">${it.unit}</span>` : "";
-      return `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span>${unit}</span>`;
-    }).join(`<span class="qSep">/</span>`);
-
-    const icon = q.kind === "topic" ? "🔎" : "🧮";
-
+  function createCardElement(q) {
     const card = document.createElement("div");
     card.className = "qcard dynamic";
-    card.innerHTML = `
-      <div class="qOne">
-        <span class="qItem"><b>${q.prompt || "計算"}</b></span>
-        <span class="qSep">/</span>
-        ${itemsHtml}
-      </div>
-      <div class="qIcon" aria-hidden="true">${icon}</div>
-    `;
+    renderCardInner(card, q);
     return card;
   }
 
-  // 既存：pH/PaCO2/HCO3（必要ならAG追加）
-  const agHtml = q.ag !== undefined
-    ? `
-      <span class="qSep">/</span>
-      <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
-    `
-    : "";
-  card.innerHTML = `
-    <div class="qOne">
-      <span class="qItem ph"><b>pH</b> <span class="vph">${Number(q.ph).toFixed(2)}</span></span>
-      <span class="qSep">/</span>
-      <span class="qItem co2"><b>PaCO₂</b> <span class="vpco2">${q.paco2}</span> <span class="unit">mmHg</span></span>
-      <span class="qSep">/</span>
-      <span class="qItem hco3"><b>HCO₃⁻</b> <span class="vhco3">${q.hco3}</span> <span class="unit">mEq/L</span></span>
-      ${agHtml}
-    </div>
-    <div class="qIcon" aria-hidden="true">🚑</div>
-  `;
-  return card;
-}
+  function updateCardElement(card, q) {
+    renderCardInner(card, q);
+  }
 
 
   function showResult(result) {
@@ -328,8 +406,10 @@ function createCardElement(q) {
     toggleNormalsPanel,
     setPauseLabel,
     renderChoices,
+    renderMultiChoices,
     showCompButtons,
     createCardElement,
+    updateCardElement,
     showResult,
     hideResult,
 

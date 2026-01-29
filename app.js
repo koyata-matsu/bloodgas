@@ -8,6 +8,7 @@ import { createStage2 } from "./stages/stage2.js";
 import { createStage3 } from "./stages/stage3.js";
 import { createStage4 } from "./stages/stage4.js";
 import { createStage5 } from "./stages/stage5.js";
+import { createStage6 } from "./stages/stage6.js";
 
 const LS_UNLOCK_KEY = "bg_unlocked_stage_max";
 
@@ -21,6 +22,7 @@ const stages = [
   createStage3(),
   createStage4(),
   createStage5(),
+  createStage6(),
 ];
 
 const game = createGame({ ui, audio, stages });
@@ -28,7 +30,7 @@ const game = createGame({ ui, audio, stages });
 let selectedStageId = 1;
 
 function getUnlockedMax() {
-  return 6;
+  return 7;
 }
 function setUnlockedMax(v) {
   localStorage.setItem(LS_UNLOCK_KEY, String(v));

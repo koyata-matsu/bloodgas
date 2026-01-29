@@ -35,7 +35,7 @@ export function createStage1() {
   let idx = 0;
 
   return {
-    id: 1,
+    id: 2,
     name: "ステージ1：分類",
     unlockNeed: 18,
     clearCount: 30,

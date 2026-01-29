@@ -1,6 +1,6 @@
 export function createStage4() {
   return {
-    id: 4,
+    id: 5,
     name: "ステージ4：混合（準備中）",
     unlockNeed: 18,
     clearCount: 30,

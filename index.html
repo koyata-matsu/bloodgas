@@ -20,26 +20,31 @@
 
       <div class="difficulty" id="stageList">
         <button class="choice big stageBtn" data-stage="1">
+          ステージ0：正常値の判断
+          <span class="sub">高値・正常値・低値を即答</span>
+        </button>
+
+        <button class="choice big stageBtn" data-stage="2" disabled>
           ステージ1：分類
           <span class="sub">pH / PaCO₂ / HCO₃⁻ で4分類</span>
         </button>
 
-        <button class="choice big stageBtn" data-stage="2" disabled>
+        <button class="choice big stageBtn" data-stage="3" disabled>
           ステージ2：代謝性の代償について
           <span class="sub">HCO₃ + 15 で予測PaCO₂ → 合併の有無</span>
         </button>
 
-        <button class="choice big stageBtn" data-stage="3" disabled>
+        <button class="choice big stageBtn" data-stage="4" disabled>
           ステージ3：AG（準備中）
           <span class="sub">後日</span>
         </button>
 
-        <button class="choice big stageBtn" data-stage="4" disabled>
+        <button class="choice big stageBtn" data-stage="5" disabled>
           ステージ4：混合（準備中）
           <span class="sub">後日</span>
         </button>
 
-        <button class="choice big stageBtn" data-stage="5" disabled>
+        <button class="choice big stageBtn" data-stage="6" disabled>
           ステージ5：酸素化（準備中）
           <span class="sub">後日</span>
         </button>
@@ -76,7 +81,13 @@
       <div id="normPanel" class="normPanel hidden">
         <div><b>pH</b> 7.35–7.45</div>
         <div><b>PaCO₂</b> 35–45 mmHg</div>
+        <div><b>PaO₂</b> 80–100 mmHg</div>
         <div><b>HCO₃⁻</b> 22–26 mEq/L</div>
+        <div><b>Na</b> 135–145 mEq/L</div>
+        <div><b>K</b> 3.5–5.0 mEq/L</div>
+        <div><b>Cl</b> 98–106 mEq/L</div>
+        <div><b>Alb</b> 3.5–5.0 g/dL</div>
+        <div><b>AG</b> 8–12 mEq/L</div>
       </div>
 
       <div class="healthRow">

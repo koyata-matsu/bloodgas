@@ -94,7 +94,7 @@ export function createStage2() {
   let idx = 0;
 
   return {
-    id: 2,
+    id: 3,
     name: "ステージ2：代謝性の代償について",
     unlockNeed: 18,
     clearCount: 30,

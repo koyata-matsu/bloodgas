@@ -1,6 +1,6 @@
 export function createStage5() {
   return {
-    id: 5,
+    id: 6,
     name: "ステージ5：酸素化（準備中）",
     unlockNeed: 18,
     clearCount: 30,

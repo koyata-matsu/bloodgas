@@ -11,13 +11,71 @@ h1 { margin:0; font-size: 22px; }
 h2 { margin: 0 0 10px; font-size: 18px; }
 h3 { margin: 0 0 6px; font-size: 15px; }
 
-.difficulty { display:grid; gap:10px; margin-top: 10px; }
-.choice { width:100%; padding:12px; border-radius:12px; border:1px solid #e6e6ef; background:#fff; cursor:pointer; font-size:16px; text-align:left; }
-.choice:hover { background:#fafafe; }
-.choice[disabled] { cursor:not-allowed; opacity:.5; }
+.difficulty {
+  display:grid;
+  gap:12px;
+  margin-top: 10px;
+}
+.choice {
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid #e6e6ef;
+  background:#fff;
+  cursor:pointer;
+  font-size:16px;
+  text-align:left;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.choice:hover {
+  background:#fafafe;
+  border-color:#dfe2ff;
+  box-shadow: 0 10px 18px rgba(92, 110, 255, .12);
+  transform: translateY(-1px);
+}
+.choice[disabled] {
+  cursor:not-allowed;
+  opacity:.6;
+  background:#fbfbff;
+}
 .choice.selected { border-color:#111; background:#f3f3f3; }
-.choice.big { padding:14px; }
-.choice .sub { display:block; font-size: 12px; opacity:.7; margin-top:6px; }
+.choice.big { padding:16px; }
+.choice .sub {
+  display:block;
+  font-size: 12px;
+  opacity:.7;
+  margin-top:8px;
+  color:#4b5563;
+}
+.stageRow{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.stageTitle{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-weight:700;
+  color:#111827;
+}
+.stageEmoji{ font-size: 18px; }
+.stageTag{
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #e6e6ef;
+  background: #f4f5ff;
+  color: #4338ca;
+}
+.stageTag.live{
+  background: #e8fdf1;
+  border-color: #b7f0cb;
+  color: #166534;
+}
 
 .lesson { display:grid; gap:12px; margin-top: 12px; }
 .lessonBox { background:#fafafa; border:1px solid #eee; border-radius:12px; padding:12px; }

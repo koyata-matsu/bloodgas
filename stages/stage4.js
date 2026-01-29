@@ -1,14 +1,23 @@
 import { shuffle, randInt } from "../utils/rand.js";
 
 const CHOICES_STAGE4 = [
-  "慢性であり、代謝性代償あり",
-  "急性であり、代謝性代償なし",
+  "呼吸性アシドーシス　慢性であり、代謝性代償あり",
+  "呼吸性アシドーシス　急性であり、代謝性代償なし",
+  "呼吸性アルカローシス　慢性であり、代謝性代償あり",
+  "呼吸性アルカローシス　急性であり、代謝性代償なし",
 ];
 
 const NORMAL_HCO3 = { min: 22, max: 26 };
 
 function isNormalHco3(hco3) {
   return hco3 >= NORMAL_HCO3.min && hco3 <= NORMAL_HCO3.max;
+}
+
+function getChoiceIndex(kind, isChronic) {
+  if (kind === "acidosis") {
+    return isChronic ? 0 : 1;
+  }
+  return isChronic ? 2 : 3;
 }
 
 function makeRespAcidosis(isChronic) {
@@ -20,7 +29,7 @@ function makeRespAcidosis(isChronic) {
     ph,
     paco2,
     hco3,
-    ans: isNormalHco3(hco3) ? 1 : 0,
+    ans: getChoiceIndex("acidosis", isChronic && !isNormalHco3(hco3)),
   };
 }
 
@@ -33,7 +42,7 @@ function makeRespAlkalosis(isChronic) {
     ph,
     paco2,
     hco3,
-    ans: isNormalHco3(hco3) ? 1 : 0,
+    ans: getChoiceIndex("alkalosis", isChronic && !isNormalHco3(hco3)),
   };
 }
 
@@ -80,7 +89,7 @@ export function createStage4() {
       </div>
     `,
 
-    startDesc: "HCO₃⁻が動いているかで、急性/慢性＋代償あり/なしを2択で判定。",
+    startDesc: "HCO₃⁻が動いているかで、呼吸性異常の種類＋急性/慢性（代償あり/なし）を4択で判定。",
 
     nextQuestion() {
       if (idx >= bank.length) {

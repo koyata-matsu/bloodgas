@@ -8,6 +8,9 @@ const CHOICES_STAGE4 = [
 ];
 
 const NORMAL_HCO3 = { min: 22, max: 26 };
+const NORMAL_PACO2 = 40;
+const NORMAL_HCO3_CENTER = 24;
+const ACUTE_HCO3_TOLERANCE = 2;
 
 function isNormalHco3(hco3) {
   return hco3 >= NORMAL_HCO3.min && hco3 <= NORMAL_HCO3.max;
@@ -20,6 +23,20 @@ function getChoiceIndex(kind, isChronic) {
   return isChronic ? 2 : 3;
 }
 
+function isAcuteByCompensation(kind, paco2, hco3) {
+  const deltaPaco2 = paco2 - NORMAL_PACO2;
+  const expectedDeltaHco3 = kind === "acidosis"
+    ? deltaPaco2 * 0.1
+    : deltaPaco2 * 0.2;
+  const expectedHco3 = NORMAL_HCO3_CENTER + expectedDeltaHco3;
+  return Math.abs(hco3 - expectedHco3) <= ACUTE_HCO3_TOLERANCE;
+}
+
+function getAnswerIndex(kind, paco2, hco3) {
+  const isAcute = isNormalHco3(hco3) || isAcuteByCompensation(kind, paco2, hco3);
+  return getChoiceIndex(kind, !isAcute);
+}
+
 function makeRespAcidosis(isChronic) {
   const paco2 = randInt(55, 80);
   const hco3 = isChronic ? randInt(28, 40) : randInt(22, 26);
@@ -29,7 +46,7 @@ function makeRespAcidosis(isChronic) {
     ph,
     paco2,
     hco3,
-    ans: getChoiceIndex("acidosis", isChronic && !isNormalHco3(hco3)),
+    ans: getAnswerIndex("acidosis", paco2, hco3),
   };
 }
 
@@ -42,7 +59,7 @@ function makeRespAlkalosis(isChronic) {
     ph,
     paco2,
     hco3,
-    ans: getChoiceIndex("alkalosis", isChronic && !isNormalHco3(hco3)),
+    ans: getAnswerIndex("alkalosis", paco2, hco3),
   };
 }
 
@@ -88,6 +105,7 @@ export function createStage4() {
         <h3>判定ポイント</h3>
         <div class="oneBlock">
           <div><b>HCO₃⁻が正常域</b>なら急性。</div>
+          <div>急性の代償式に合うならHCO₃⁻が正常域外でも急性。</div>
           <div><b>HCO₃⁻が高値/低値</b>なら慢性（代謝性代償あり）。</div>
           <div>PaCO₂の変化とHCO₃⁻の動きが<b>同方向</b>なら慢性。</div>
         </div>

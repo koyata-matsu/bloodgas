@@ -95,7 +95,7 @@ export function createStage2() {
 
   return {
     id: 3,
-    name: "ステージ2：代謝性の代償について",
+    name: "ステージ2：代謝性の代償と合併",
     unlockNeed: 18,
     clearCount: 30,
     overlapStart: 14,
@@ -109,31 +109,33 @@ export function createStage2() {
 
     lessonHTML: `
       <div class="lessonBox">
-        <h3>ステージ2：代謝性の代償について</h3>
+        <h3>ステージ2：代謝性の代償と合併</h3>
         <div class="oneBlock">
-          <div>代謝性アシドーシスの時は、<b>AG開大</b>かどうか＋<b>呼吸性アルカローシス</b>があるか</div>
-          <div>代謝性アルカローシスの時は、<b>呼吸性アシドーシス</b>があるか</div>
+          <div>代謝性異常では、<b>呼吸性の代償が適切か</b>を必ず確認する。</div>
+          <div>代償が「強すぎる / 弱すぎる」ときは<b>合併病態</b>を疑う。</div>
         </div>
       </div>
 
       <div class="lessonBox">
         <h3>マジックナンバー15</h3>
         <div class="oneBlock">
-          <div><b>予測PaCO₂ = HCO₃ + 15</b></div>
+          <div><b>予測PaCO₂ = HCO₃⁻ + 15</b></div>
+          <div>代謝性アシドーシス / アルカローシスのどちらも使える。</div>
         </div>
       </div>
 
       <div class="lessonBox">
         <h3>判定</h3>
         <div class="oneBlock">
-          <div>★ 実測PaCO₂ = 予測PaCO₂ → <b>正常の代償機構（合併なし）</b></div>
-          <div>★ 実測PaCO₂ ＞ 予測PaCO₂ → <b>呼吸性アシドーシスの合併</b></div>
-          <div>★ 実測PaCO₂ ＜ 予測PaCO₂ → <b>呼吸性アルカローシスの合併</b></div>
+          <div>★ 実測PaCO₂ ≈ 予測PaCO₂ → <b>代償は適切（合併なし）</b></div>
+          <div>★ 実測PaCO₂ ＞ 予測PaCO₂ → <b>呼吸性アシドーシス合併</b></div>
+          <div>★ 実測PaCO₂ ＜ 予測PaCO₂ → <b>呼吸性アルカローシス合併</b></div>
+          <div>★ AGが高ければ<b>AG開大型</b>として分類を分ける。</div>
         </div>
       </div>
     `,
 
-    startDesc: "pH/PaCO₂/HCO₃⁻/AGを見て、HCO₃ + 15 で予測PaCO₂を出し、合併を6択で判定。",
+    startDesc: "HCO₃⁻ + 15 で予測PaCO₂を出し、代償の適切さと合併を6択で判定。",
 
     nextQuestion() {
       if (idx >= bank.length) {

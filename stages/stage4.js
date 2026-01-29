@@ -63,7 +63,7 @@ export function createStage4() {
 
   return {
     id: 5,
-    name: "ステージ4：呼吸性異常と代謝性代償",
+    name: "ステージ4：呼吸性異常の急性/慢性",
     unlockNeed: 18,
     clearCount: 30,
     overlapStart: 14,
@@ -72,19 +72,28 @@ export function createStage4() {
 
     lessonHTML: `
       <div class="lessonBox">
-        <h3>ステージ4：呼吸性異常と代謝性代償</h3>
+        <h3>ステージ4：呼吸性異常の急性/慢性</h3>
         <div class="oneBlock">
-          <div>呼吸性アシドーシス／呼吸性アルカローシスに対して<b>代謝性代償があるか</b>を判定。</div>
-          <div>腎臓の反応は時間がかかるため、<b>急性ではほぼ代償なし</b>。</div>
+          <div>呼吸性アシドーシス/アルカローシスに対して<b>腎性代償（HCO₃⁻の変化）</b>を見る。</div>
+          <div>急性では代償が小さく、慢性ではHCO₃⁻が大きく動く。</div>
         </div>
       </div>
 
       <div class="lessonBox">
         <h3>判定ポイント</h3>
         <div class="oneBlock">
-          <div><b>HCO₃⁻が動いているかどうか</b>だけを見る。</div>
-          <div>HCO₃⁻がほぼ正常 → 代謝性代償なし（急性）</div>
-          <div>HCO₃⁻が明らかに高値/低値 → 代謝性代償あり（慢性）</div>
+          <div><b>HCO₃⁻が正常域</b>なら急性。</div>
+          <div><b>HCO₃⁻が高値/低値</b>なら慢性（代謝性代償あり）。</div>
+          <div>PaCO₂の変化とHCO₃⁻の動きが<b>同方向</b>なら慢性。</div>
+        </div>
+      </div>
+
+      <div class="lessonBox">
+        <h3>実践メモ</h3>
+        <div class="oneBlock">
+          <div>呼吸性アシドーシス → HCO₃⁻が上がると慢性。</div>
+          <div>呼吸性アルカローシス → HCO₃⁻が下がると慢性。</div>
+          <div>迷ったら「HCO₃⁻のズレが大きいか」を優先して判断。</div>
         </div>
       </div>
     `,

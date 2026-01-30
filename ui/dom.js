@@ -111,10 +111,32 @@ export function createUI() {
     if (el.lessonTitle) el.lessonTitle.textContent = title;
   }
 
-  function setStageButtons(unlockedMax) {
+  const stageStatusLabels = {
+    locked: "ロック中",
+    challenging: "挑戦中",
+    unlocked: "解放",
+    cleared: "クリア",
+  };
+
+  function setStageButtons(stageStates = []) {
+    const statusById = new Map(stageStates.map((state) => [state.id, state.status]));
     el.stageBtns.forEach((b) => {
       const id = Number(b.dataset.stage || "1");
-      b.disabled = id > unlockedMax;
+      const status = statusById.get(id) || "locked";
+      b.disabled = status === "locked";
+
+      const row = b.querySelector(".stageRow");
+      let tag = b.querySelector(".stageTag");
+      if (!tag && row) {
+        tag = document.createElement("span");
+        tag.className = "stageTag";
+        row.appendChild(tag);
+      }
+      if (tag) {
+        tag.textContent = stageStatusLabels[status] || stageStatusLabels.locked;
+        tag.classList.remove("locked", "challenging", "unlocked", "cleared", "live");
+        tag.classList.add(status);
+      }
     });
   }
 

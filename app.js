@@ -11,6 +11,7 @@ import { createStage5 } from "./stages/stage5.js";
 import { createStage6 } from "./stages/stage6.js";
 
 const LS_UNLOCK_KEY = "bg_unlocked_stage_max";
+const LS_CLEARED_KEY = "bg_cleared_stage_ids_v1";
 
 const ui = createUI();
 const audio = createAudio();
@@ -235,15 +236,56 @@ async function uploadLogsIfDue() {
 }
 
 function getUnlockedMax() {
-  return 7;
+  const raw = localStorage.getItem(LS_UNLOCK_KEY);
+  const parsed = Number.parseInt(raw ?? "", 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return 1;
+  return Math.min(parsed, stages.length);
 }
 function setUnlockedMax(v) {
-  localStorage.setItem(LS_UNLOCK_KEY, String(v));
+  const safe = Math.min(Math.max(1, v), stages.length);
+  localStorage.setItem(LS_UNLOCK_KEY, String(safe));
+}
+
+function loadClearedStageIds() {
+  try {
+    const raw = localStorage.getItem(LS_CLEARED_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    if (Array.isArray(parsed)) return new Set(parsed.map(Number).filter(Number.isFinite));
+  } catch (err) {
+    console.warn("Failed to load cleared stages", err);
+  }
+  return new Set();
+}
+
+function saveClearedStageIds(ids) {
+  localStorage.setItem(LS_CLEARED_KEY, JSON.stringify([...ids]));
+}
+
+const clearedStageIds = loadClearedStageIds();
+
+function markStageCleared(stageId) {
+  if (clearedStageIds.has(stageId)) return;
+  clearedStageIds.add(stageId);
+  saveClearedStageIds(clearedStageIds);
+}
+
+function buildStageStates() {
+  const unlockedMax = getUnlockedMax();
+  return stages.map((stage) => {
+    if (stage.id > unlockedMax) return { id: stage.id, status: "locked" };
+    if (clearedStageIds.has(stage.id)) return { id: stage.id, status: "cleared" };
+    if (stage.id === selectedStageId) return { id: stage.id, status: "challenging" };
+    return { id: stage.id, status: "unlocked" };
+  });
+}
+
+function refreshStageButtons() {
+  ui.setStageButtons(buildStageStates());
 }
 function unlockUpTo(stageId) {
   const cur = getUnlockedMax();
   if (stageId > cur) setUnlockedMax(stageId);
-  ui.setStageButtons(getUnlockedMax());
+  refreshStageButtons();
 }
 
 function applyStageToLesson(stageId) {
@@ -271,6 +313,7 @@ ui.onSelectStage((stageId) => {
   applyStageToLesson(stageId);
   audio.stopBGM();
   ui.showScreen("lesson"); // ★ステージ2は必ず解説ページへ → 全ステージこれで統一
+  refreshStageButtons();
 });
 
 // ---- screen navigation ----
@@ -308,10 +351,13 @@ ui.onRestart(() => {
   game.prepareRun();
 });
 ui.onExit(() => {
-  game.stop();
-  audio.stopBGM();
-  setStage6Mode(false);
-  ui.showScreen("menu");
+  const ended = game.endRun();
+  if (!ended) {
+    game.stop();
+    audio.stopBGM();
+    setStage6Mode(false);
+    ui.showScreen("menu");
+  }
 });
 
 // result modal
@@ -383,7 +429,11 @@ game.onLog((payload) => {
 game.onResult((result) => {
   // 18問到達で解放 or クリアで次解放
   if (result.unlockedNextStageId) unlockUpTo(result.unlockedNextStageId);
-  if (result.cleared) unlockUpTo(Math.min(result.stageId + 1, stages.length));
+  if (result.cleared) {
+    markStageCleared(result.stageId);
+    unlockUpTo(Math.min(result.stageId + 1, stages.length));
+  }
+  refreshStageButtons();
 
   // 次ボタンを押せるように
   ui.showResult(result);
@@ -417,6 +467,6 @@ game.onResult((result) => {
 });
 
 // init
-ui.setStageButtons(getUnlockedMax());
+refreshStageButtons();
 applyStageToLesson(1);
 ui.showScreen("menu");

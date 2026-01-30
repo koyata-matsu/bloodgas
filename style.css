@@ -60,6 +60,8 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   gap:8px;
   font-weight:700;
   color:#111827;
+  font-size: 15px;
+  white-space: nowrap;
 }
 .stageEmoji{ font-size: 18px; }
 .stageTag{
@@ -92,17 +94,12 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   color: #6b7280;
 }
 
-.lesson { display:grid; gap:12px; margin-top: 12px; }
-.lessonBox { background:#fafafa; border:1px solid #eee; border-radius:12px; padding:12px; }
-.lessonBox ul { margin: 8px 0 0 18px; }
-.lessonBox li { margin: 4px 0; }
 .oneBlock{ font-size: 14px; line-height: 1.6; display: grid; gap: 6px; margin-top: 8px; }
 
 .actions { display:flex; gap:10px; margin-top: 12px; flex-wrap: wrap; }
 .btn { padding:10px 12px; border-radius:12px; border:1px solid #111; background:#111; color:#fff; cursor:pointer; }
 .btn.ghost { background:#fff; color:#111; }
 .btn:disabled { opacity:.4; cursor:not-allowed; }
-.foot { text-align:center; opacity:.6; margin-top: 14px; }
 
 /* HUD */
 .hud{
@@ -112,6 +109,9 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   gap:12px;
   flex-wrap:wrap;
   margin-bottom: 10px;
+}
+.stage1-mode .hud{
+  display: none;
 }
 .hudBox{
   background:#111;
@@ -379,7 +379,7 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   border-radius: 16px;
 }
 .startBox{
-  width: min(520px, calc(100% - 24px));
+  width: min(520px, calc(100% - 48px));
   background: #fff;
   border: 1px solid #eee;
   border-radius: 18px;
@@ -444,4 +444,71 @@ audio{ display:none; }
   .feedback { font-size: 12px; min-height: 32px; }
   .modalCard { width: min(480px, calc(100% - 20px)); padding: 12px; }
   .scoreBig { font-size: 36px; }
+}
+
+@media (max-width: 430px) {
+  .wrap { padding: 16px; }
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 17px; }
+  .meta { font-size: 13px; gap: 8px; }
+  .card { padding: 14px; }
+  .choice,
+  .choiceBtn { font-size: 16px; padding: 10px; }
+  .choice.big { padding: 12px; }
+  .choice .sub { font-size: 13px; margin-top: 6px; }
+  .stageTitle { font-size: 14px; }
+  .stageEmoji { font-size: 16px; }
+  .stageTag { font-size: 13px; padding: 3px 8px; }
+  .startBox { width: min(520px, calc(100% - 32px)); }
+  .hudBox { min-width: 180px; padding: 8px 10px; }
+  .hudValue { font-size: 20px; }
+  .hudNeed { font-size: 14px; }
+  .hudBtn { padding: 8px 10px; font-size: 14px; }
+  .normPanel { font-size: 14px; }
+  .questionArea { padding: 8px 10px; margin-bottom: 10px; }
+  .questionText { font-size: 16px; }
+  .stage6-mode .questionArea { padding: 12px 14px; }
+  .stage6-mode .questionText { font-size: 17px; }
+  .lane { height: 140px; margin-bottom: 8px; }
+  .qOne { font-size: 14px; padding: 8px; gap: 6px; }
+  .qOne.case { font-size: 14px; }
+  .unit { font-size: 13px; }
+  .hintArea,
+  .feedback { font-size: 14px; }
+  .choices { gap: 8px; }
+  .choiceCheck { font-size: 15px; padding: 8px 10px; }
+  .choiceCheck input { transform: scale(1.0); }
+  .rankTitle { font-size: 24px; }
+  .scoreBig { font-size: 36px; }
+  .wrongAnswer { font-size: 18px; }
+  .qIcon { font-size: 34px; margin-top: 6px; }
+}
+
+@media (max-width: 375px) {
+  h1 { font-size: 23px; }
+  .choice,
+  .choiceBtn { font-size: 15px; }
+  .choiceCheck { font-size: 14px; }
+  .questionText { font-size: 15px; }
+  .stage6-mode .questionText { font-size: 16px; }
+  .lane { height: 130px; }
+  .hudValue { font-size: 19px; }
+  .scoreBig { font-size: 34px; }
+}
+
+@media (min-width: 768px) {
+  h1 { font-size: 28px; }
+  h2 { font-size: 22px; }
+  .meta { font-size: 15px; }
+  .choice,
+  .choiceBtn { font-size: 17px; }
+  .choice .sub { font-size: 14px; }
+  .hudValue { font-size: 23px; }
+  .hudNeed { font-size: 15px; }
+  .questionText { font-size: 17px; }
+  .stage6-mode .questionText { font-size: 18px; }
+  .choiceCheck { font-size: 16px; }
+  .rankTitle { font-size: 26px; }
+  .scoreBig { font-size: 48px; }
 }

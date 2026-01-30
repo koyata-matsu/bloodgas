@@ -109,7 +109,7 @@ export function createStage0() {
   return {
     id: 1,
     name: "ステージ0：正常値の判断",
-    unlockNeed: 18,
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 14,
     twoLaneSpawnInterval: {
@@ -118,9 +118,7 @@ export function createStage0() {
     },
     choices: CHOICES_STAGE0,
     hints: [
-      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 10–14",
-      "計算式: なし（基準範囲と比較して判定）",
-      "覚える: 正常値のレンジを即答できるようにする",
+      "正常値レンジを思い出して、高値/正常/低値を即答。",
     ],
 
     lessonHTML: `

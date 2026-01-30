@@ -49,15 +49,13 @@ export function createStage1() {
   return {
     id: 2,
     name: "ステージ1：酸塩基の4分類",
-    unlockNeed: 18,
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE1,
     hints: [
       "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26",
-      "計算式: まずpHでアシドーシス/アルカローシス → 一致するPaCO₂ or HCO₃⁻で主病態判定",
-      "覚える: pH↓=アシドーシス / pH↑=アルカローシス",
     ],
 
     lessonHTML: `

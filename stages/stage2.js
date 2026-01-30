@@ -106,15 +106,13 @@ export function createStage2() {
   return {
     id: 3,
     name: "ステージ2：代謝性の代償と合併",
-    unlockNeed: 18,
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 14,
 
     choices: CHOICES_STAGE2,
     hints: [
-      "正常値: AG 10–14 / HCO₃⁻ 22–26 / PaCO₂ 35–45",
-      "計算式: 予測PaCO₂ = HCO₃⁻ + 15",
-      "覚える: 実測PaCO₂が予測より高い=呼吸性アシドーシス合併 / 低い=呼吸性アルカローシス合併",
+      "予測PaCO₂ = HCO₃⁻ + 15 を基準に合併を判定。",
     ],
 
     // 10問目以降から2レーン

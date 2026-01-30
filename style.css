@@ -1,5 +1,5 @@
 :root { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
-body { margin: 0; background:#f6f7fb; color:#111; }
+body { margin: 0; background:#f6f7fb; color:#111; overflow-x: hidden; }
 .wrap { max-width: 820px; margin: 0 auto; padding: 20px; }
 .head { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
 h1 { margin:0; font-size: 22px; }
@@ -398,3 +398,35 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 .wrongExplain { line-height: 1.6; color: #374151; }
 
 audio{ display:none; }
+
+@media (min-width: 768px) and (orientation: landscape) {
+  .difficulty {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .wrap { padding: 12px; }
+  h1 { font-size: 18px; }
+  h2 { font-size: 16px; }
+  .card { padding: 12px; border-radius: 12px; }
+  .choice,
+  .choiceBtn { padding: 10px; font-size: 14px; }
+  .choice.big { padding: 12px; }
+  .choice .sub { font-size: 11px; margin-top: 6px; }
+  .hud { margin-bottom: 6px; gap: 8px; }
+  .hudBox { min-width: 180px; padding: 8px 10px; border-radius: 12px; }
+  .hudValue { font-size: 18px; }
+  .hudNeed { font-size: 12px; }
+  .hudBtn { padding: 8px 10px; }
+  .normPanel { font-size: 12px; padding: 8px 10px; margin-bottom: 8px; }
+  .healthRow { margin: 6px 0 10px; }
+  .questionArea { padding: 8px 10px; margin-bottom: 10px; }
+  .questionText { font-size: 14px; }
+  .lane { height: 110px; margin-bottom: 8px; }
+  .panel { gap: 8px; }
+  .hintArea { font-size: 12px; }
+  .feedback { font-size: 12px; min-height: 32px; }
+  .modalCard { width: min(480px, calc(100% - 20px)); padding: 12px; }
+  .scoreBig { font-size: 36px; }
+}

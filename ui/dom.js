@@ -52,10 +52,6 @@ export function createUI() {
     menuBtn: $("menuBtn"),
     downloadLogBtn: $("downloadLogBtn"),
 
-    wrongModal: $("wrongModal"),
-    wrongAnswer: $("wrongAnswer"),
-    wrongExplain: $("wrongExplain"),
-    wrongCloseBtn: $("wrongCloseBtn"),
   };
 
   // constants shared with engine/layout.js
@@ -127,8 +123,8 @@ export function createUI() {
   function setLaneHeight(maxNow) {
     if (!el.lane) return;
     const lanes = Math.max(1, Number.isFinite(maxNow) ? maxNow : 1);
-    const baseCardHeight = 120;
-    const minHeight = 120;
+    const baseCardHeight = 96;
+    const minHeight = 96;
     const height = layout.TOP_Y + layout.ROW_GAP * (lanes - 1) + baseCardHeight;
     el.lane.style.height = `${Math.max(minHeight, Math.round(height))}px`;
   }
@@ -402,7 +398,13 @@ export function createUI() {
     el.resultModal.classList.remove("hidden");
 
     if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "✅ ステージクリア！" : "💀 ゲームオーバー";
-    if (el.scoreNum) el.scoreNum.textContent = `${result.correct} / ${result.clearCount}`;
+    if (el.scoreNum) {
+      const clearCount = result.clearCount;
+      const scoreText = Number.isFinite(clearCount)
+        ? `${result.correct} / ${clearCount}`
+        : `${result.correct}`;
+      el.scoreNum.textContent = scoreText;
+    }
     if (el.scoreRate) el.scoreRate.textContent = String(result.rate);
     if (el.missNum) el.missNum.textContent = String(result.misses);
 
@@ -420,17 +422,6 @@ export function createUI() {
 
   function hideResult() {
     el.resultModal?.classList.add("hidden");
-  }
-
-  function showWrongModal(payload) {
-    if (!el.wrongModal) return;
-    if (el.wrongAnswer) el.wrongAnswer.textContent = payload?.answer || "-";
-    if (el.wrongExplain) el.wrongExplain.textContent = payload?.explanation || "-";
-    el.wrongModal.classList.remove("hidden");
-  }
-
-  function hideWrongModal() {
-    el.wrongModal?.classList.add("hidden");
   }
 
   // events
@@ -457,8 +448,6 @@ export function createUI() {
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
-  el.wrongCloseBtn?.addEventListener("click", () => hideWrongModal());
-  el.wrongModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideWrongModal());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -491,8 +480,6 @@ export function createUI() {
     updateCardElement,
     showResult,
     hideResult,
-    showWrongModal,
-    hideWrongModal,
 
     onSelectStage: (fn) => (onSelectStage = fn),
     onStart: (fn) => (onStart = fn),

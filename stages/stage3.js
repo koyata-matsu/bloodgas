@@ -133,7 +133,7 @@ export function createStage3(){
     id: 4,
     name: "ステージ3：AG計算と補正",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 15,
     hints: [
       "AG → 補正AG → 補正HCO₃の順に計算。",

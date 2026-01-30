@@ -110,7 +110,7 @@ export function createStage0() {
     id: 1,
     name: "ステージ0：正常値の判断",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
     twoLaneSpawnInterval: {
       start: 3.0,

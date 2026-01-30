@@ -107,7 +107,7 @@ export function createStage2() {
     id: 3,
     name: "ステージ2：代謝性の代償と合併",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
 
     choices: CHOICES_STAGE2,

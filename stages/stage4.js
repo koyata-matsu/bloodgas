@@ -82,7 +82,7 @@ export function createStage4() {
     id: 5,
     name: "ステージ4：呼吸性異常の急性/慢性",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE4,

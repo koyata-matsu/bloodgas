@@ -74,6 +74,30 @@ export function createGame({ ui, audio, stages }) {
     return labels[choiceIdx] ?? "";
   }
 
+  function getCorrectInfoForQuestion(q) {
+    const labels = getChoiceLabelsForQuestion(q);
+    if (labels && labels.length) {
+      for (let i = 0; i < labels.length; i += 1) {
+        const result = state.stage.checkChoice(q, i);
+        if (result?.correct) {
+          return {
+            correctLabel: result.correctLabel || labels[i],
+            explanation: result.explanation || "",
+          };
+        }
+      }
+      return {
+        correctLabel: labels[0] ?? "正解",
+        explanation: "",
+      };
+    }
+    const result = state.stage.checkChoice(q, 0);
+    return {
+      correctLabel: result?.correctLabel || "正解",
+      explanation: result?.explanation || "",
+    };
+  }
+
   function getMaxConcurrent() {
     return state.stage.maxConcurrent
       ? state.stage.maxConcurrent(state.correct, state.spawnedCount)
@@ -194,10 +218,9 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function setHUD() {
-    const remainUnlock = Math.max(0, state.stage.unlockNeed - state.correct);
     const remainClear = Math.max(0, state.stage.clearCount - state.correct);
     cbHUD({
-      stat: `${state.stage.name} / 次ステージまで ${remainUnlock}問`,
+      stat: `${state.stage.name}`,
       sub: `${remainClear === 0 ? "クリア達成！" : `クリアまで ${remainClear}問`} / ミス ${state.misses}`,
     });
   }
@@ -584,11 +607,23 @@ export function createGame({ ui, audio, stages }) {
       const t = state.cards[tIdx];
       if (effectiveX(t) <= ui.layout.MISS_X) {
         const elapsedSec = (performance.now() - t.bornAt) / 1000;
-        handleWrong("取り逃し！", 14, {
+        const missInfo = getCorrectInfoForQuestion(t.q);
+        const feedbackText = missInfo.explanation
+          ? `ミス！ ${missInfo.explanation}`
+          : "ミス！";
+        handleWrong(feedbackText, 14, {
           outcome: "miss",
           q: t.q,
           elapsedSec,
+          correctLabel: missInfo.correctLabel,
+          explanation: missInfo.explanation,
         });
+        if (missInfo.correctLabel || missInfo.explanation) {
+          ui.showWrongModal({
+            answer: missInfo.correctLabel || "正解",
+            explanation: missInfo.explanation || "解説はありません。",
+          });
+        }
       }
     }
 

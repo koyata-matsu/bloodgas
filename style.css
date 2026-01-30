@@ -464,18 +464,23 @@ audio{ display:none; }
   .hudNeed { font-size: 14px; }
   .hudBtn { padding: 8px 10px; font-size: 14px; }
   .normPanel { font-size: 14px; }
+  .questionArea { padding: 8px 10px; margin-bottom: 10px; }
   .questionText { font-size: 16px; }
+  .stage6-mode .questionArea { padding: 12px 14px; }
   .stage6-mode .questionText { font-size: 17px; }
-  .qOne { font-size: 14px; padding: 8px; }
+  .lane { height: 140px; margin-bottom: 8px; }
+  .qOne { font-size: 14px; padding: 8px; gap: 6px; }
   .qOne.case { font-size: 14px; }
   .unit { font-size: 13px; }
   .hintArea,
   .feedback { font-size: 14px; }
+  .choices { gap: 8px; }
   .choiceCheck { font-size: 15px; padding: 8px 10px; }
   .choiceCheck input { transform: scale(1.0); }
   .rankTitle { font-size: 24px; }
   .scoreBig { font-size: 36px; }
   .wrongAnswer { font-size: 18px; }
+  .qIcon { font-size: 34px; margin-top: 6px; }
 }
 
 @media (max-width: 375px) {
@@ -485,6 +490,7 @@ audio{ display:none; }
   .choiceCheck { font-size: 14px; }
   .questionText { font-size: 15px; }
   .stage6-mode .questionText { font-size: 16px; }
+  .lane { height: 130px; }
   .hudValue { font-size: 19px; }
   .scoreBig { font-size: 34px; }
 }

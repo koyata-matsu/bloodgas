@@ -288,53 +288,33 @@ function unlockUpTo(stageId) {
   refreshStageButtons();
 }
 
-function applyStageToLesson(stageId) {
+function applyStageMeta(stageId) {
   const st = stages[stageId - 1];
-  ui.setLessonTitle(st.name);
-  const lessonBody = document.getElementById("lessonBody");
-  if (lessonBody) lessonBody.innerHTML = st.lessonHTML || "";
-  ui.enableNextToLesson(true);
-
-  // start overlay text
   const startTitle = document.getElementById("startTitle");
   const startDesc = document.getElementById("startDesc");
   if (startTitle) startTitle.textContent = st.name;
   if (startDesc) startDesc.textContent = st.startDesc || "スタートして開始";
 }
 
-function setStage6Mode(on) {
-  document.body.classList.toggle("stage6-mode", on);
+function setStageMode(stageId) {
+  document.body.classList.toggle("stage6-mode", stageId === 7);
+  document.body.classList.toggle("stage1-mode", stageId === 2);
 }
 
 // ---- menu stage selection ----
 ui.onSelectStage((stageId) => {
   selectedStageId = stageId;
   game.setStage(stageId);
-  applyStageToLesson(stageId);
+  applyStageMeta(stageId);
   audio.stopBGM();
-  ui.showScreen("lesson"); // ★ステージ2は必ず解説ページへ → 全ステージこれで統一
-  refreshStageButtons();
-});
-
-// ---- screen navigation ----
-ui.onGoLesson(() => {
-  audio.stopBGM();
-  setStage6Mode(false);
-  ui.showScreen("lesson");
-});
-ui.onBackToMenu(() => {
-  setStage6Mode(false);
-  ui.showScreen("menu");
-});
-
-uploadLogsIfDue();
-
-ui.onGoGame(() => {
-  setStage6Mode(selectedStageId === 7);
+  setStageMode(stageId);
   ui.showScreen("game");
   startRunSession();
   game.prepareRun();
+  refreshStageButtons();
 });
+
+uploadLogsIfDue();
 
 ui.onStart(() => {
   audio.unlockByGesture();
@@ -355,7 +335,7 @@ ui.onExit(() => {
   if (!ended) {
     game.stop();
     audio.stopBGM();
-    setStage6Mode(false);
+    setStageMode(null);
     ui.showScreen("menu");
   }
 });
@@ -371,7 +351,7 @@ ui.onResultMenu(() => {
   ui.hideResult();
   game.stop();
   audio.stopBGM();
-  setStage6Mode(false);
+  setStageMode(null);
   ui.showScreen("menu");
 });
 
@@ -381,12 +361,14 @@ ui.onResultNextStage(() => {
   if (nextId <= getUnlockedMax()) {
     selectedStageId = nextId;
     game.setStage(nextId);
-    applyStageToLesson(nextId);
+    applyStageMeta(nextId);
     audio.stopBGM();
-    setStage6Mode(false);
-    ui.showScreen("lesson");
+    setStageMode(nextId);
+    ui.showScreen("game");
+    startRunSession();
+    game.prepareRun();
   } else {
-    setStage6Mode(false);
+    setStageMode(null);
     ui.showScreen("menu");
   }
 });
@@ -468,5 +450,5 @@ game.onResult((result) => {
 
 // init
 refreshStageButtons();
-applyStageToLesson(1);
+applyStageMeta(1);
 ui.showScreen("menu");

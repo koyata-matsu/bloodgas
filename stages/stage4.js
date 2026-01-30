@@ -81,15 +81,13 @@ export function createStage4() {
   return {
     id: 5,
     name: "ステージ4：呼吸性異常の急性/慢性",
-    unlockNeed: 18,
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE4,
     hints: [
-      "正常値: HCO₃⁻ 22–26 / PaCO₂ 35–45",
-      "計算式（急性代償）: アシドーシスはPaCO₂↑10ごとにHCO₃⁻+1 / アルカローシスはPaCO₂↓10ごとにHCO₃⁻-2",
-      "覚える: HCO₃⁻が正常域なら急性、急性代償式に合えば正常域外でも急性",
+      "HCO₃⁻のズレ量で急性/慢性を判断。",
     ],
 
     lessonHTML: `

@@ -43,6 +43,13 @@ export function createAudio() {
     });
   }
 
+  function pauseBGM() {
+    [a.bgmEarly, a.bgmLate].forEach(x => {
+      if (!x) return;
+      x.pause();
+    });
+  }
+
   function bgm(mode) {
     if (!ready) return;
     if (mode === "late") {
@@ -57,6 +64,7 @@ export function createAudio() {
   return {
     unlockByGesture,
     stopBGM,
+    pauseBGM,
     bgm,
     click: () => { unlockByGesture(); playOnce(a.click); },
     ok: () => { unlockByGesture(); playOnce(a.ok); },

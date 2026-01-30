@@ -132,13 +132,11 @@ export function createStage3(){
   return {
     id: 4,
     name: "ステージ3：AG計算と補正",
-    unlockNeed: 18,      // ★18問で次ステージ解放
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 15,
     hints: [
-      "正常値: AG 10–14 / Alb 4.0 / HCO₃⁻ 22–26",
-      "計算式: AG=Na-(Cl+HCO₃⁻)、補正AG=AG+2.5×(4.0−Alb)、補正HCO₃=HCO₃⁻+(補正AG−12)",
-      "覚える: 補正HCO₃が22–26なら純粋、＜22で非開大型合併、＞26で代謝性アルカローシス合併",
+      "AG → 補正AG → 補正HCO₃の順に計算。",
     ],
 
     // 2レーンなし（速度のみ上昇）

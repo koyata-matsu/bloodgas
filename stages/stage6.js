@@ -675,14 +675,12 @@ export function createStage6() {
   return {
     id: 7,
     name: "ステージ6：症例ベース総合問題",
-    unlockNeed: 18,
+    unlockNeed: 30,
     clearCount: 30,
     overlapStart: 14,
     needsComp: false,
     hints: [
-      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 10–14",
-      "計算式: AG=Na-(Cl+HCO₃⁻)、補正AG=AG+2.5×(4.0−Alb)",
-      "覚える: 病態→追加検査→病歴→原因推論の流れを固定する",
+      "病態→追加検査→病歴の順で考える。",
     ],
 
     lessonHTML: `

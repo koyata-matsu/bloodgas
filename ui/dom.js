@@ -3,17 +3,10 @@ export function createUI() {
 
   const el = {
     screenMenu: $("screenMenu"),
-    screenLesson: $("screenLesson"),
     screenGame: $("screenGame"),
     modeLabel: $("modeLabel"),
 
-    lessonTitle: $("lessonTitle"),
-
     stageBtns: [...document.querySelectorAll(".stageBtn")],
-
-    toLessonBtn: $("toLessonBtn"),
-    toGameBtn: $("toGameBtn"),
-    backToMenuBtn: $("backToMenuBtn"),
 
     hudStat: $("hudStat"),
     hudSub: $("hudSub"),
@@ -85,9 +78,6 @@ export function createUI() {
 
   // callbacks
   let onSelectStage = () => {};
-  let onGoLesson = () => {};
-  let onGoGame = () => {};
-  let onBackToMenu = () => {};
   let onStart = () => {};
   let onToggleNormals = () => {};
   let onPauseToggle = () => {};
@@ -102,13 +92,8 @@ export function createUI() {
 
   function showScreen(name) {
     el.screenMenu?.classList.toggle("hidden", name !== "menu");
-    el.screenLesson?.classList.toggle("hidden", name !== "lesson");
     el.screenGame?.classList.toggle("hidden", name !== "game");
     if (el.modeLabel) el.modeLabel.textContent = name[0].toUpperCase() + name.slice(1);
-  }
-
-  function setLessonTitle(title) {
-    if (el.lessonTitle) el.lessonTitle.textContent = title;
   }
 
   const stageStatusLabels = {
@@ -138,10 +123,6 @@ export function createUI() {
         tag.classList.add(status);
       }
     });
-  }
-
-  function enableNextToLesson(on) {
-    if (el.toLessonBtn) el.toLessonBtn.disabled = !on;
   }
 
   function setHUD(stat, sub) {
@@ -468,9 +449,6 @@ export function createUI() {
     });
   });
 
-  el.toLessonBtn?.addEventListener("click", () => onGoLesson());
-  el.backToMenuBtn?.addEventListener("click", () => onBackToMenu());
-  el.toGameBtn?.addEventListener("click", () => onGoGame());
   el.startBtn?.addEventListener("click", () => onStart());
 
   el.toggleNormBtn?.addEventListener("click", () => onToggleNormals());
@@ -498,9 +476,7 @@ export function createUI() {
     layout,
 
     showScreen,
-    setLessonTitle,
     setStageButtons,
-    enableNextToLesson,
     setHUD,
     setLaneHeight,
     setHP,
@@ -527,9 +503,6 @@ export function createUI() {
     hideWrongModal,
 
     onSelectStage: (fn) => (onSelectStage = fn),
-    onGoLesson: (fn) => (onGoLesson = fn),
-    onGoGame: (fn) => (onGoGame = fn),
-    onBackToMenu: (fn) => (onBackToMenu = fn),
     onStart: (fn) => (onStart = fn),
     onToggleNormals: (fn) => (onToggleNormals = fn),
     onPauseToggle: (fn) => (onPauseToggle = fn),

@@ -566,6 +566,27 @@ function applyStep(q) {
   q.prompt = step.prompt;
   q.stepLabel = step.stepLabel;
   q.showHistory = q.step >= 2;
+  q.questionText = buildQuestionText(q);
+}
+
+function formatCaseSummary(q) {
+  return [
+    `pH ${Number(q.ph).toFixed(2)}`,
+    `PaCO₂ ${q.paco2}`,
+    `HCO₃⁻ ${q.hco3}`,
+    `Na ${q.na}`,
+    `Cl ${q.cl}`,
+    `Alb ${Number(q.alb).toFixed(1)}`,
+    `AG ${q.ag}`,
+  ].join(" / ");
+}
+
+function buildQuestionText(q) {
+  const parts = [q.prompt, formatCaseSummary(q)];
+  if (q.showHistory && q.history) {
+    parts.push(`現病歴: ${q.history}`);
+  }
+  return parts.filter(Boolean).join(" / ");
 }
 
 function buildQuestion(caseDef) {
@@ -585,6 +606,7 @@ function buildQuestion(caseDef) {
     testsOptions: caseDef.tests.options,
     correctTests: caseDef.tests.correct,
     pathologies: caseDef.pathologies,
+    hideCard: true,
   };
   applyStep(q);
   return q;

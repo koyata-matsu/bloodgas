@@ -88,8 +88,8 @@ export function createStage4() {
     choices: CHOICES_STAGE4,
     hints: [
       "正常値: HCO₃⁻ 22–26 / PaCO₂ 35–45",
-      "計算式: なし（HCO₃⁻が正常なら急性、ずれていれば慢性）",
-      "覚える: 呼吸性アシドーシスはHCO₃⁻↑で慢性、呼吸性アルカローシスはHCO₃⁻↓で慢性",
+      "計算式（急性代償）: アシドーシスはPaCO₂↑10ごとにHCO₃⁻+1 / アルカローシスはPaCO₂↓10ごとにHCO₃⁻-2",
+      "覚える: HCO₃⁻が正常域なら急性、急性代償式に合えば正常域外でも急性",
     ],
 
     lessonHTML: `
@@ -114,6 +114,7 @@ export function createStage4() {
       <div class="lessonBox">
         <h3>実践メモ</h3>
         <div class="oneBlock">
+          <div>急性代償の目安：アシドーシスは「PaCO₂+10 → HCO₃⁻+1」、アルカローシスは「PaCO₂-10 → HCO₃⁻-2」。</div>
           <div>呼吸性アシドーシス → HCO₃⁻が上がると慢性。</div>
           <div>呼吸性アルカローシス → HCO₃⁻が下がると慢性。</div>
           <div>迷ったら「HCO₃⁻のズレが大きいか」を優先して判断。</div>

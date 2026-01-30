@@ -10,9 +10,6 @@ export function createUI() {
     hudStat: $("hudStat"),
     hudSub: $("hudSub"),
 
-    toggleNormBtn: $("toggleNormBtn"),
-    normPanel: $("normPanel"),
-
     healthFill: $("healthFill"),
     healthBar: document.querySelector(".healthBar"),
 
@@ -78,7 +75,6 @@ export function createUI() {
   // callbacks
   let onSelectStage = () => {};
   let onStart = () => {};
-  let onToggleNormals = () => {};
   let onPauseToggle = () => {};
   let onRestart = () => {};
   let onExit = () => {};
@@ -130,7 +126,11 @@ export function createUI() {
 
   function setLaneHeight(maxNow) {
     if (!el.lane) return;
-    el.lane.style.height = (maxNow >= 2) ? "360px" : "170px";
+    const lanes = Math.max(1, Number.isFinite(maxNow) ? maxNow : 1);
+    const baseCardHeight = 120;
+    const minHeight = 120;
+    const height = layout.TOP_Y + layout.ROW_GAP * (lanes - 1) + baseCardHeight;
+    el.lane.style.height = `${Math.max(minHeight, Math.round(height))}px`;
   }
 
   function setHP(hp, hpMax, anim) {
@@ -200,10 +200,6 @@ export function createUI() {
     if (!el.startOverlay) return;
     el.startOverlay.style.display = "none";
     el.startOverlay.classList.add("hidden");
-  }
-
-  function toggleNormalsPanel() {
-    el.normPanel?.classList.toggle("hidden");
   }
 
   function setPauseLabel(text) {
@@ -449,7 +445,6 @@ export function createUI() {
 
   el.startBtn?.addEventListener("click", () => onStart());
 
-  el.toggleNormBtn?.addEventListener("click", () => onToggleNormals());
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
   el.restartBtn?.addEventListener("click", () => onRestart());
   el.exitBtn?.addEventListener("click", () => onExit());
@@ -487,7 +482,6 @@ export function createUI() {
     showJudge,
     showStartOverlay,
     hideStartOverlay,
-    toggleNormalsPanel,
     setPauseLabel,
     renderChoices,
     setHints,
@@ -502,7 +496,6 @@ export function createUI() {
 
     onSelectStage: (fn) => (onSelectStage = fn),
     onStart: (fn) => (onStart = fn),
-    onToggleNormals: (fn) => (onToggleNormals = fn),
     onPauseToggle: (fn) => (onPauseToggle = fn),
     onRestart: (fn) => (onRestart = fn),
     onExit: (fn) => (onExit = fn),

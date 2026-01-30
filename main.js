@@ -51,8 +51,6 @@ export function bootApp() {
     game.startRun();
   });
 
-  ui.onToggleNormals(() => ui.toggleNormalsPanel());
-
   ui.onPauseToggle(() => game.togglePause());
   ui.onRestart(() => game.prepareRun());
   ui.onExit(() => {

@@ -460,7 +460,7 @@ audio{ display:none; }
   .stageTitle { font-size: 14px; }
   .stageEmoji { font-size: 16px; }
   .stageTag { font-size: 13px; padding: 3px 8px; }
-  .startBox { width: min(520px, calc(100% - 32px)); }
+  .startBox { width: min(520px, calc(100% - 40px)); }
   .hudBox { min-width: 180px; padding: 8px 10px; }
   .hudValue { font-size: 20px; }
   .hudNeed { font-size: 14px; }
@@ -483,6 +483,7 @@ audio{ display:none; }
   .scoreBig { font-size: 36px; }
   .wrongAnswer { font-size: 18px; }
   .qIcon { font-size: 34px; margin-top: 6px; }
+  .modalCard { width: min(480px, calc(100% - 40px)); }
 }
 
 @media (max-width: 375px) {

@@ -445,3 +445,46 @@ audio{ display:none; }
   .modalCard { width: min(480px, calc(100% - 20px)); padding: 12px; }
   .scoreBig { font-size: 36px; }
 }
+
+@media (max-width: 430px) {
+  .wrap { padding: 16px; }
+  h1 { font-size: 19px; }
+  h2 { font-size: 16px; }
+  h3 { font-size: 14px; }
+  .meta { font-size: 12px; gap: 8px; }
+  .card { padding: 14px; }
+  .choice,
+  .choiceBtn { font-size: 14px; padding: 10px; }
+  .choice.big { padding: 12px; }
+  .choice .sub { font-size: 11px; margin-top: 6px; }
+  .stageEmoji { font-size: 16px; }
+  .stageTag { font-size: 11px; padding: 3px 8px; }
+  .hudBox { min-width: 180px; padding: 8px 10px; }
+  .hudValue { font-size: 18px; }
+  .hudNeed { font-size: 12px; }
+  .hudBtn { padding: 8px 10px; font-size: 12px; }
+  .normPanel { font-size: 12px; }
+  .questionText { font-size: 14px; }
+  .stage6-mode .questionText { font-size: 15px; }
+  .qOne { font-size: 12px; padding: 8px; }
+  .qOne.case { font-size: 12px; }
+  .unit { font-size: 11px; }
+  .hintArea,
+  .feedback { font-size: 12px; }
+  .choiceCheck { font-size: 13px; padding: 8px 10px; }
+  .choiceCheck input { transform: scale(1.0); }
+  .rankTitle { font-size: 20px; }
+  .scoreBig { font-size: 34px; }
+  .wrongAnswer { font-size: 16px; }
+}
+
+@media (max-width: 375px) {
+  h1 { font-size: 18px; }
+  .choice,
+  .choiceBtn { font-size: 13px; }
+  .choiceCheck { font-size: 12px; }
+  .questionText { font-size: 13px; }
+  .stage6-mode .questionText { font-size: 14px; }
+  .hudValue { font-size: 17px; }
+  .scoreBig { font-size: 30px; }
+}

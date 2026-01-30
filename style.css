@@ -60,6 +60,8 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   gap:8px;
   font-weight:700;
   color:#111827;
+  font-size: 15px;
+  white-space: nowrap;
 }
 .stageEmoji{ font-size: 18px; }
 .stageTag{
@@ -92,17 +94,12 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   color: #6b7280;
 }
 
-.lesson { display:grid; gap:12px; margin-top: 12px; }
-.lessonBox { background:#fafafa; border:1px solid #eee; border-radius:12px; padding:12px; }
-.lessonBox ul { margin: 8px 0 0 18px; }
-.lessonBox li { margin: 4px 0; }
 .oneBlock{ font-size: 14px; line-height: 1.6; display: grid; gap: 6px; margin-top: 8px; }
 
 .actions { display:flex; gap:10px; margin-top: 12px; flex-wrap: wrap; }
 .btn { padding:10px 12px; border-radius:12px; border:1px solid #111; background:#111; color:#fff; cursor:pointer; }
 .btn.ghost { background:#fff; color:#111; }
 .btn:disabled { opacity:.4; cursor:not-allowed; }
-.foot { text-align:center; opacity:.6; margin-top: 14px; }
 
 /* HUD */
 .hud{
@@ -112,6 +109,9 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   gap:12px;
   flex-wrap:wrap;
   margin-bottom: 10px;
+}
+.stage1-mode .hud{
+  display: none;
 }
 .hudBox{
   background:#111;
@@ -457,6 +457,7 @@ audio{ display:none; }
   .choiceBtn { font-size: 16px; padding: 10px; }
   .choice.big { padding: 12px; }
   .choice .sub { font-size: 13px; margin-top: 6px; }
+  .stageTitle { font-size: 14px; }
   .stageEmoji { font-size: 16px; }
   .stageTag { font-size: 13px; padding: 3px 8px; }
   .hudBox { min-width: 180px; padding: 8px 10px; }

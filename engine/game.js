@@ -27,6 +27,8 @@ export function createGame({ ui, audio, stages }) {
     slowHoldSec: 0,
     slowMult: 1.0,
 
+    bgmMode: "early",
+
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
   };
 
@@ -47,6 +49,11 @@ export function createGame({ ui, audio, stages }) {
       stageName: state.stage.name,
       ...payload,
     });
+  }
+
+  function setBgmMode(mode) {
+    state.bgmMode = mode;
+    cbBgmMode(mode);
   }
 
   function getChoiceLabelsForQuestion(q) {
@@ -227,7 +234,7 @@ export function createGame({ ui, audio, stages }) {
 
     clearCards();
     audio.stopBGM();
-    cbBgmMode("early");
+    setBgmMode("early");
 
     ui.showCompButtons(false);
     ui.hideWrongModal();
@@ -272,7 +279,7 @@ export function createGame({ ui, audio, stages }) {
     }
     state.lastSpawnAt = performance.now() / 1000;
 
-    cbBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
+    setBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
     forceRelayoutAll();
     updateHints();
 
@@ -612,7 +619,7 @@ export function createGame({ ui, audio, stages }) {
       const spawned = spawnCard();
       if (spawned) state.spawnCooldown = calcSpawnIntervalSec(getMaxConcurrent());
     }
-    cbBgmMode("early");
+    setBgmMode("early");
     audio.bgm("early");
 
     stop();
@@ -625,9 +632,11 @@ export function createGame({ ui, audio, stages }) {
     ui.setPauseLabel(state.paused ? "再開" : "一時停止");
     if (!state.paused) {
       state.lastTs = null;
+      audio.bgm(state.bgmMode);
       stop();
       state.rafId = requestAnimationFrame(loop);
     } else {
+      audio.pauseBGM();
       stop();
     }
   }

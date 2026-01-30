@@ -40,13 +40,6 @@ export function bootApp() {
     const unlockedMax = getUnlockedMax();
     if (stageId > unlockedMax) return; // locked
     game.setStage(stageId);
-    ui.enableNextToLesson(true);
-  });
-
-  ui.onGoLesson(() => ui.showScreen("lesson"));
-  ui.onBackToMenu(() => ui.showScreen("menu"));
-
-  ui.onGoGame(() => {
     ui.showScreen("game");
     game.prepareRun();
   });
@@ -87,8 +80,8 @@ export function bootApp() {
     const unlockedMax = getUnlockedMax();
     if (next <= unlockedMax) {
       game.setStage(next);
-      ui.showScreen("lesson"); // 次ステージ説明画面へ（今は共通）
-      ui.setLessonTitle(stages[next - 1].name);
+      ui.showScreen("game");
+      game.prepareRun();
     } else {
       ui.showScreen("menu");
     }
@@ -123,6 +116,5 @@ export function bootApp() {
 
   // 初期表示
   applyUnlockUI();
-  ui.setLessonTitle(stage1.name);
   ui.showScreen("menu");
 }

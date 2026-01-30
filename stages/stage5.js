@@ -32,7 +32,7 @@ export function createStage5() {
     id: 6,
     name: "ステージ5：原因検索の優先順位",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE5,

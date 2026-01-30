@@ -676,7 +676,7 @@ export function createStage6() {
     id: 7,
     name: "ステージ6：症例ベース総合問題",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
     needsComp: false,
     hints: [

@@ -10,9 +10,6 @@ export function createUI() {
     hudStat: $("hudStat"),
     hudSub: $("hudSub"),
 
-    toggleNormBtn: $("toggleNormBtn"),
-    normPanel: $("normPanel"),
-
     healthFill: $("healthFill"),
     healthBar: document.querySelector(".healthBar"),
 
@@ -55,10 +52,6 @@ export function createUI() {
     menuBtn: $("menuBtn"),
     downloadLogBtn: $("downloadLogBtn"),
 
-    wrongModal: $("wrongModal"),
-    wrongAnswer: $("wrongAnswer"),
-    wrongExplain: $("wrongExplain"),
-    wrongCloseBtn: $("wrongCloseBtn"),
   };
 
   // constants shared with engine/layout.js
@@ -78,7 +71,6 @@ export function createUI() {
   // callbacks
   let onSelectStage = () => {};
   let onStart = () => {};
-  let onToggleNormals = () => {};
   let onPauseToggle = () => {};
   let onRestart = () => {};
   let onExit = () => {};
@@ -130,7 +122,11 @@ export function createUI() {
 
   function setLaneHeight(maxNow) {
     if (!el.lane) return;
-    el.lane.style.height = (maxNow >= 2) ? "360px" : "170px";
+    const lanes = Math.max(1, Number.isFinite(maxNow) ? maxNow : 1);
+    const baseCardHeight = 96;
+    const minHeight = 96;
+    const height = layout.TOP_Y + layout.ROW_GAP * (lanes - 1) + baseCardHeight;
+    el.lane.style.height = `${Math.max(minHeight, Math.round(height))}px`;
   }
 
   function setHP(hp, hpMax, anim) {
@@ -200,10 +196,6 @@ export function createUI() {
     if (!el.startOverlay) return;
     el.startOverlay.style.display = "none";
     el.startOverlay.classList.add("hidden");
-  }
-
-  function toggleNormalsPanel() {
-    el.normPanel?.classList.toggle("hidden");
   }
 
   function setPauseLabel(text) {
@@ -406,7 +398,13 @@ export function createUI() {
     el.resultModal.classList.remove("hidden");
 
     if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "✅ ステージクリア！" : "💀 ゲームオーバー";
-    if (el.scoreNum) el.scoreNum.textContent = `${result.correct} / ${result.clearCount}`;
+    if (el.scoreNum) {
+      const clearCount = result.clearCount;
+      const scoreText = Number.isFinite(clearCount)
+        ? `${result.correct} / ${clearCount}`
+        : `${result.correct}`;
+      el.scoreNum.textContent = scoreText;
+    }
     if (el.scoreRate) el.scoreRate.textContent = String(result.rate);
     if (el.missNum) el.missNum.textContent = String(result.misses);
 
@@ -426,17 +424,6 @@ export function createUI() {
     el.resultModal?.classList.add("hidden");
   }
 
-  function showWrongModal(payload) {
-    if (!el.wrongModal) return;
-    if (el.wrongAnswer) el.wrongAnswer.textContent = payload?.answer || "-";
-    if (el.wrongExplain) el.wrongExplain.textContent = payload?.explanation || "-";
-    el.wrongModal.classList.remove("hidden");
-  }
-
-  function hideWrongModal() {
-    el.wrongModal?.classList.add("hidden");
-  }
-
   // events
   el.stageBtns.forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -449,7 +436,6 @@ export function createUI() {
 
   el.startBtn?.addEventListener("click", () => onStart());
 
-  el.toggleNormBtn?.addEventListener("click", () => onToggleNormals());
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
   el.restartBtn?.addEventListener("click", () => onRestart());
   el.exitBtn?.addEventListener("click", () => onExit());
@@ -462,8 +448,6 @@ export function createUI() {
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
-  el.wrongCloseBtn?.addEventListener("click", () => hideWrongModal());
-  el.wrongModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideWrongModal());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -487,7 +471,6 @@ export function createUI() {
     showJudge,
     showStartOverlay,
     hideStartOverlay,
-    toggleNormalsPanel,
     setPauseLabel,
     renderChoices,
     setHints,
@@ -497,12 +480,9 @@ export function createUI() {
     updateCardElement,
     showResult,
     hideResult,
-    showWrongModal,
-    hideWrongModal,
 
     onSelectStage: (fn) => (onSelectStage = fn),
     onStart: (fn) => (onStart = fn),
-    onToggleNormals: (fn) => (onToggleNormals = fn),
     onPauseToggle: (fn) => (onPauseToggle = fn),
     onRestart: (fn) => (onRestart = fn),
     onExit: (fn) => (onExit = fn),

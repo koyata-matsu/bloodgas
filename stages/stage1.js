@@ -50,7 +50,7 @@ export function createStage1() {
     id: 2,
     name: "ステージ1：酸塩基の4分類",
     unlockNeed: 30,
-    clearCount: 30,
+    clearCount: Infinity,
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE1,

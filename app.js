@@ -323,7 +323,6 @@ ui.onStart(() => {
   game.startRun();
 });
 
-ui.onToggleNormals(() => ui.toggleNormalsPanel());
 ui.onPauseToggle(() => game.togglePause());
 
 ui.onRestart(() => {

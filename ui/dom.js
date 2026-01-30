@@ -303,6 +303,20 @@ export function createUI() {
       return;
     }
 
+    if (q && q.kind === "topic") {
+      const itemsHtml = (q.items || [])
+        .map(it => `<span class="qItem"><b>${it.k}</b> <span>${it.v}</span></span>`)
+        .join(`<span class="qSep">/</span>`);
+      card.innerHTML = `
+        <div class="qOne">
+          <span class="qItem"><b>${q.prompt || "問題"}</b></span>
+          ${itemsHtml ? `<span class="qSep">/</span>${itemsHtml}` : ""}
+        </div>
+        <div class="qIcon" aria-hidden="true">📌</div>
+      `;
+      return;
+    }
+
     if (q && q.kind === "case") {
       const row1 = `
         <div class="caseRow">
@@ -371,11 +385,17 @@ export function createUI() {
   function createCardElement(q) {
     const card = document.createElement("div");
     card.className = "qcard dynamic";
+    if (q?.hideCard) card.classList.add("hidden");
     renderCardInner(card, q);
     return card;
   }
 
   function updateCardElement(card, q) {
+    if (q?.hideCard) {
+      card.classList.add("hidden");
+    } else {
+      card.classList.remove("hidden");
+    }
     renderCardInner(card, q);
   }
 

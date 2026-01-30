@@ -136,7 +136,7 @@ export function createGame({ ui, audio, stages }) {
     const tIdx = pickTargetIndex(state.cards);
     if (tIdx < 0) return;
     const q = state.cards[tIdx].q;
-    ui.setQuestionText(q.prompt || "");
+    ui.setQuestionText(q.questionText || q.prompt || "");
     ui.setQuestionStep(q.stepLabel || "");
   }
 

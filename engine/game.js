@@ -183,7 +183,7 @@ export function createGame({ ui, audio, stages }) {
     state.hp = clamp(v, 0, state.hpMax);
     cbHP(state.hp, state.hpMax, anim);
     ui.setHP(state.hp, state.hpMax, anim);
-    if (state.running && state.hp <= 0) finish(false, null);
+    if (state.running && state.hp <= 0) finish("hp");
   }
 
   function setHUD() {
@@ -191,7 +191,7 @@ export function createGame({ ui, audio, stages }) {
     const remainClear = Math.max(0, state.stage.clearCount - state.correct);
     cbHUD({
       stat: `${state.stage.name} / 次ステージまで ${remainUnlock}問`,
-      sub: `クリアまで ${remainClear}問 / ミス ${state.misses}`,
+      sub: `${remainClear === 0 ? "クリア達成！" : `クリアまで ${remainClear}問`} / ミス ${state.misses}`,
     });
   }
 
@@ -338,14 +338,31 @@ export function createGame({ ui, audio, stages }) {
     return null;
   }
 
-  function finish(cleared, unlockedNextStageId) {
+  function getNextStageId() {
+    const nextId = state.stage.id + 1;
+    if (nextId > stages.length) return null;
+    return nextId;
+  }
+
+  function getUnlockedNextStageId() {
+    if (state.correct >= state.stage.unlockNeed) return getNextStageId();
+    return null;
+  }
+
+  function finish(reason = "gameover") {
     state.running = false;
     state.paused = true;
     stop();
     audio.stopBGM();
 
-    cbSfx(cleared ? "finish" : "gameover");
+    const cleared = state.correct >= state.stage.clearCount;
+    if (cleared) {
+      cbSfx("finish");
+    } else if (reason !== "manual") {
+      cbSfx("gameover");
+    }
 
+    const unlockedNextStageId = getUnlockedNextStageId();
     cbResult({
       stageId: state.stage.id,
       stageName: state.stage.name,
@@ -387,9 +404,6 @@ export function createGame({ ui, audio, stages }) {
     setHUD();
     const unlocked = unlockNextIfNeeded();
 
-    if (state.correct >= state.stage.clearCount) {
-      finish(true, unlocked ?? Math.min(state.stage.id + 1, stages.length));
-    }
   }
 
   function handleCorrect(text = "OK！") {
@@ -494,9 +508,6 @@ export function createGame({ ui, audio, stages }) {
     const unlocked = unlockNextIfNeeded();
     setHUD();
 
-    if (state.correct >= state.stage.clearCount) {
-      finish(true, unlocked ?? Math.min(state.stage.id + 1, stages.length));
-    }
   }
 
   function loop(ts) {
@@ -635,6 +646,11 @@ export function createGame({ ui, audio, stages }) {
 
     prepareRun,
     startRun,
+    endRun: () => {
+      if (!state.running) return false;
+      finish("manual");
+      return true;
+    },
     togglePause,
     stop,
 

@@ -23,7 +23,10 @@ export function bootApp() {
 
   function applyUnlockUI() {
     const unlockedMax = getUnlockedMax();
-    ui.setStageButtons(stages, unlockedMax);
+    ui.setStageButtons(stages.map((stage) => ({
+      id: stage.id,
+      status: stage.id > unlockedMax ? "locked" : "unlocked",
+    })));
   }
 
   function unlockStage(stageId) {

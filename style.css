@@ -71,10 +71,25 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   background: #f4f5ff;
   color: #4338ca;
 }
-.stageTag.live{
+.stageTag.challenging{
   background: #e8fdf1;
   border-color: #b7f0cb;
   color: #166534;
+}
+.stageTag.unlocked{
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #3730a3;
+}
+.stageTag.cleared{
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #9a3412;
+}
+.stageTag.locked{
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #6b7280;
 }
 
 .lesson { display:grid; gap:12px; margin-top: 12px; }

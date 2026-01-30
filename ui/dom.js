@@ -4,7 +4,6 @@ export function createUI() {
   const el = {
     screenMenu: $("screenMenu"),
     screenGame: $("screenGame"),
-    modeLabel: $("modeLabel"),
 
     stageBtns: [...document.querySelectorAll(".stageBtn")],
 
@@ -93,7 +92,6 @@ export function createUI() {
   function showScreen(name) {
     el.screenMenu?.classList.toggle("hidden", name !== "menu");
     el.screenGame?.classList.toggle("hidden", name !== "game");
-    if (el.modeLabel) el.modeLabel.textContent = name[0].toUpperCase() + name.slice(1);
   }
 
   const stageStatusLabels = {

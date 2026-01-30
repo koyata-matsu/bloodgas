@@ -379,7 +379,7 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   border-radius: 16px;
 }
 .startBox{
-  width: min(520px, calc(100% - 24px));
+  width: min(520px, calc(100% - 48px));
   background: #fff;
   border: 1px solid #eee;
   border-radius: 18px;
@@ -460,6 +460,7 @@ audio{ display:none; }
   .stageTitle { font-size: 14px; }
   .stageEmoji { font-size: 16px; }
   .stageTag { font-size: 13px; padding: 3px 8px; }
+  .startBox { width: min(520px, calc(100% - 32px)); }
   .hudBox { min-width: 180px; padding: 8px 10px; }
   .hudValue { font-size: 20px; }
   .hudNeed { font-size: 14px; }

@@ -618,6 +618,12 @@ export function createGame({ ui, audio, stages }) {
           correctLabel: missInfo.correctLabel,
           explanation: missInfo.explanation,
         });
+        if (missInfo.correctLabel || missInfo.explanation) {
+          ui.showWrongModal({
+            answer: missInfo.correctLabel || "正解",
+            explanation: missInfo.explanation || "解説はありません。",
+          });
+        }
       }
     }
 

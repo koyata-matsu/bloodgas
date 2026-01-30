@@ -260,6 +260,10 @@ function applyStageToLesson(stageId) {
   if (startDesc) startDesc.textContent = st.startDesc || "スタートして開始";
 }
 
+function setStage6Mode(on) {
+  document.body.classList.toggle("stage6-mode", on);
+}
+
 // ---- menu stage selection ----
 ui.onSelectStage((stageId) => {
   selectedStageId = stageId;
@@ -272,13 +276,18 @@ ui.onSelectStage((stageId) => {
 // ---- screen navigation ----
 ui.onGoLesson(() => {
   audio.stopBGM();
+  setStage6Mode(false);
   ui.showScreen("lesson");
 });
-ui.onBackToMenu(() => ui.showScreen("menu"));
+ui.onBackToMenu(() => {
+  setStage6Mode(false);
+  ui.showScreen("menu");
+});
 
 uploadLogsIfDue();
 
 ui.onGoGame(() => {
+  setStage6Mode(selectedStageId === 7);
   ui.showScreen("game");
   startRunSession();
   game.prepareRun();
@@ -301,6 +310,7 @@ ui.onRestart(() => {
 ui.onExit(() => {
   game.stop();
   audio.stopBGM();
+  setStage6Mode(false);
   ui.showScreen("menu");
 });
 
@@ -315,6 +325,7 @@ ui.onResultMenu(() => {
   ui.hideResult();
   game.stop();
   audio.stopBGM();
+  setStage6Mode(false);
   ui.showScreen("menu");
 });
 
@@ -326,8 +337,10 @@ ui.onResultNextStage(() => {
     game.setStage(nextId);
     applyStageToLesson(nextId);
     audio.stopBGM();
+    setStage6Mode(false);
     ui.showScreen("lesson");
   } else {
+    setStage6Mode(false);
     ui.showScreen("menu");
   }
 });

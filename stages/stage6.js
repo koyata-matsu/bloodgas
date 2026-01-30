@@ -557,9 +557,9 @@ function sameLabelSet(a, b) {
 
 function applyStep(q) {
   const steps = [
-    { title: "① 病態をすべて選択", prompt: "酸塩基異常をすべて選択", stepLabel: "1/3" },
-    { title: "② 追加検査", prompt: "この病態で追加で確認したい検査はどれ？", stepLabel: "2/3" },
-    { title: "③ 病態を当てる", prompt: "この患者に当てはまる病態を選択せよ。", stepLabel: "3/3" },
+    { title: "① 病態をすべて選択", prompt: "血液ガスから酸塩基異常をすべて選択せよ。", stepLabel: "1/3" },
+    { title: "② 追加検査", prompt: "追加で確認すべき検査を選べ。", stepLabel: "2/3" },
+    { title: "③ 病態を当てる", prompt: "最も考えられる病態を選択せよ。", stepLabel: "3/3" },
   ];
   const step = steps[q.step] || steps[0];
   q.stepTitle = step.title;
@@ -569,11 +569,16 @@ function applyStep(q) {
   q.questionText = buildQuestionText(q);
 }
 
-function formatCaseSummary(q) {
+function formatGasLine(q) {
   return [
     `pH ${Number(q.ph).toFixed(2)}`,
     `PaCO₂ ${q.paco2}`,
     `HCO₃⁻ ${q.hco3}`,
+  ].join(" / ");
+}
+
+function formatElectrolyteLine(q) {
+  return [
     `Na ${q.na}`,
     `Cl ${q.cl}`,
     `Alb ${Number(q.alb).toFixed(1)}`,
@@ -582,11 +587,15 @@ function formatCaseSummary(q) {
 }
 
 function buildQuestionText(q) {
-  const parts = [q.prompt, formatCaseSummary(q)];
+  const lines = [
+    `【設問${q.step + 1}】${q.prompt}`,
+    `【血液ガス】${formatGasLine(q)}`,
+    `【電解質】${formatElectrolyteLine(q)}`,
+  ];
   if (q.showHistory && q.history) {
-    parts.push(`現病歴: ${q.history}`);
+    lines.push(`【現病歴】${q.history}`);
   }
-  return parts.filter(Boolean).join(" / ");
+  return lines.filter(Boolean).join("\n");
 }
 
 function buildQuestion(caseDef) {

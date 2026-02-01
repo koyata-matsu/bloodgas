@@ -19,8 +19,8 @@ export function bootApp() {
   const game = createGame({ ui, audio, stages });
 
   // --- unlock ---
-  const getUnlockedMax = () => Number(localStorage.getItem(LS_UNLOCK_KEY) || "1");
-  const setUnlockedMax = (v) => localStorage.setItem(LS_UNLOCK_KEY, String(v));
+  const getUnlockedMax = () => stages.length;
+  const setUnlockedMax = () => {};
   const getHintEnabled = () => localStorage.getItem(LS_HINT_KEY) !== "0";
   const setHintEnabled = (v) => localStorage.setItem(LS_HINT_KEY, v ? "1" : "0");
 

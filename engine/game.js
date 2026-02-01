@@ -225,8 +225,8 @@ export function createGame({ ui, audio, stages }) {
       ? Math.max(0, state.stage.clearCount - state.correct)
       : null;
     const clearText = isClearFinite
-      ? (remainClear === 0 ? "クリア達成！" : `クリアまで ${remainClear}問`)
-      : "続けよう";
+      ? (remainClear === 0 ? "クリア達成！" : `クリアまであと ${remainClear}問`)
+      : "クリアまであと何問";
     cbHUD({
       stat: `${state.stage.name}`,
       sub: `${clearText} / ミス ${state.misses}`,

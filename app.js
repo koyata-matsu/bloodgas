@@ -16,6 +16,8 @@ const LS_HINT_KEY = "bg_hint_first10";
 
 const ui = createUI();
 const audio = createAudio();
+const DEFAULT_CARD_MIN = ui.layout.CARD_W_MIN;
+const DEFAULT_CARD_MAX = ui.layout.CARD_W_MAX;
 
 const stages = [
   createStage0(),
@@ -305,9 +307,20 @@ function applyStageMeta(stageId) {
   if (startDesc) startDesc.textContent = st.startDesc || "スタートして開始";
 }
 
+function setStageLayout(stageId) {
+  if (stageId === 1) {
+    ui.layout.CARD_W_MIN = 220;
+    ui.layout.CARD_W_MAX = 300;
+    return;
+  }
+  ui.layout.CARD_W_MIN = DEFAULT_CARD_MIN;
+  ui.layout.CARD_W_MAX = DEFAULT_CARD_MAX;
+}
+
 function setStageMode(stageId) {
   document.body.classList.toggle("stage6-mode", stageId === 7);
   document.body.classList.toggle("stage1-mode", stageId === 2);
+  setStageLayout(stageId);
 }
 
 // ---- menu stage selection ----

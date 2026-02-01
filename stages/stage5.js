@@ -37,7 +37,7 @@ export function createStage5() {
     needsComp: false,
     choices: CHOICES_STAGE5,
     hints: [
-      "病態を分類して、最初の検査を1つ選ぶ。",
+      "pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 10–14",
     ],
 
     lessonHTML: `

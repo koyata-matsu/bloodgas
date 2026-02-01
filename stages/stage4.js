@@ -87,7 +87,7 @@ export function createStage4() {
     needsComp: false,
     choices: CHOICES_STAGE4,
     hints: [
-      "HCO₃⁻のズレ量で急性/慢性を判断。",
+      "急性補正式：PaCO₂+10→HCO₃⁻+1 / PaCO₂-10→HCO₃⁻-2",
     ],
 
     lessonHTML: `

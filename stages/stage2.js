@@ -112,7 +112,7 @@ export function createStage2() {
 
     choices: CHOICES_STAGE2,
     hints: [
-      "予測PaCO₂ = HCO₃⁻ + 15 を基準に合併を判定。",
+      "予測PaCO₂ = HCO₃⁻ + 15（±1）",
     ],
 
     // 10問目以降から2レーン

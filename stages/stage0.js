@@ -118,7 +118,7 @@ export function createStage0() {
     },
     choices: CHOICES_STAGE0,
     hints: [
-      "正常値レンジを思い出して、高値/正常/低値を即答。",
+      "pH 7.35–7.45 / PaCO₂ 35–45 / PaO₂ 80–100 / HCO₃⁻ 22–26 / AG 10–14",
     ],
 
     lessonHTML: `

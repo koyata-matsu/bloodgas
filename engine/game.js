@@ -30,6 +30,8 @@ export function createGame({ ui, audio, stages }) {
     bgmMode: "early",
 
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
+
+    hintEnabled: true,
   };
 
   // callbacks
@@ -150,7 +152,7 @@ export function createGame({ ui, audio, stages }) {
 
   function updateHints() {
     const hints = state.stage.hints || [];
-    const show = state.spawnedCount <= 10;
+    const show = state.hintEnabled && state.spawnedCount <= 10;
     ui.setHints(hints, show);
   }
 
@@ -707,5 +709,9 @@ export function createGame({ ui, audio, stages }) {
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
     onLog: (fn) => (cbLog = fn),
+    setHintEnabled: (enabled) => {
+      state.hintEnabled = Boolean(enabled);
+      updateHints();
+    },
   };
 }

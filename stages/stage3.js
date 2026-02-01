@@ -136,7 +136,7 @@ export function createStage3(){
     clearCount: Infinity,
     overlapStart: 15,
     hints: [
-      "AG → 補正AG → 補正HCO₃の順に計算。",
+      "AG=Na-(Cl+HCO₃) / 補正AG=AG+2.5×(4.0-Alb) / 補正HCO₃=HCO₃+(補正AG-12)",
     ],
 
     // 2レーンなし（速度のみ上昇）

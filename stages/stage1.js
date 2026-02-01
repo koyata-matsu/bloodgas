@@ -55,7 +55,7 @@ export function createStage1() {
     needsComp: false,
     choices: CHOICES_STAGE1,
     hints: [
-      "正常値: pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26",
+      "pH / PaCO₂ / HCO₃⁻",
     ],
 
     lessonHTML: `

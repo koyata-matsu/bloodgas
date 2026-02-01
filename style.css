@@ -522,6 +522,8 @@ audio{ display:none; }
   .stage6-mode .questionText { font-size: 17px; }
   .lane { height: 140px; margin-bottom: 8px; }
   .qOne { font-size: 14px; padding: 8px; gap: 6px; }
+  .stage1-mode .qOne { flex-direction: column; align-items: flex-start; }
+  .stage1-mode .qOne .qSep { display: none; }
   .qOne.case { font-size: 14px; }
   .unit { font-size: 13px; }
   .hintArea,

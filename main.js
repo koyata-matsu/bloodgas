@@ -9,6 +9,7 @@ import { stage4 } from "./stages/stage4.js";
 import { stage5 } from "./stages/stage5.js";
 
 const LS_UNLOCK_KEY = "bg_unlocked_stage_max";
+const LS_HINT_KEY = "bg_hint_first10";
 
 export function bootApp() {
   const ui = createUI();
@@ -18,8 +19,10 @@ export function bootApp() {
   const game = createGame({ ui, audio, stages });
 
   // --- unlock ---
-  const getUnlockedMax = () => Number(localStorage.getItem(LS_UNLOCK_KEY) || "1");
-  const setUnlockedMax = (v) => localStorage.setItem(LS_UNLOCK_KEY, String(v));
+  const getUnlockedMax = () => stages.length;
+  const setUnlockedMax = () => {};
+  const getHintEnabled = () => localStorage.getItem(LS_HINT_KEY) !== "0";
+  const setHintEnabled = (v) => localStorage.setItem(LS_HINT_KEY, v ? "1" : "0");
 
   function applyUnlockUI() {
     const unlockedMax = getUnlockedMax();
@@ -39,6 +42,9 @@ export function bootApp() {
   ui.onSelectStage((stageId) => {
     const unlockedMax = getUnlockedMax();
     if (stageId > unlockedMax) return; // locked
+    const hintEnabled = getHintEnabled();
+    ui.setHintToggle(hintEnabled);
+    game.setHintEnabled(hintEnabled);
     game.setStage(stageId);
     ui.showScreen("game");
     game.prepareRun();
@@ -57,6 +63,11 @@ export function bootApp() {
     game.stop();
     audio.stopBGM();
     ui.showScreen("menu");
+  });
+
+  ui.onHintToggle((enabled) => {
+    setHintEnabled(enabled);
+    game.setHintEnabled(enabled);
   });
 
   ui.onResultRetry(() => {
@@ -113,6 +124,9 @@ export function bootApp() {
   });
 
   // 初期表示
+  const hintEnabled = getHintEnabled();
+  ui.setHintToggle(hintEnabled);
+  game.setHintEnabled(hintEnabled);
   applyUnlockUI();
   ui.showScreen("menu");
 }

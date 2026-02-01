@@ -30,6 +30,8 @@ export function createGame({ ui, audio, stages }) {
     bgmMode: "early",
 
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
+
+    hintEnabled: true,
   };
 
   // callbacks
@@ -150,7 +152,7 @@ export function createGame({ ui, audio, stages }) {
 
   function updateHints() {
     const hints = state.stage.hints || [];
-    const show = state.spawnedCount <= 10;
+    const show = state.hintEnabled && state.spawnedCount <= 10;
     ui.setHints(hints, show);
   }
 
@@ -223,8 +225,8 @@ export function createGame({ ui, audio, stages }) {
       ? Math.max(0, state.stage.clearCount - state.correct)
       : null;
     const clearText = isClearFinite
-      ? (remainClear === 0 ? "クリア達成！" : `クリアまで ${remainClear}問`)
-      : "続けよう";
+      ? (remainClear === 0 ? "クリア達成！" : `クリアまであと ${remainClear}問`)
+      : "クリアまであと何問";
     cbHUD({
       stat: `${state.stage.name}`,
       sub: `${clearText} / ミス ${state.misses}`,
@@ -707,5 +709,9 @@ export function createGame({ ui, audio, stages }) {
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
     onLog: (fn) => (cbLog = fn),
+    setHintEnabled: (enabled) => {
+      state.hintEnabled = Boolean(enabled);
+      updateHints();
+    },
   };
 }

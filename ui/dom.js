@@ -35,6 +35,8 @@ export function createUI() {
     startBtn: $("startBtn"),
     startTitle: $("startTitle"),
     startDesc: $("startDesc"),
+    hintToggle: $("hintToggle"),
+    hintToggleState: $("hintToggleState"),
 
     hintArea: $("hintArea"),
     hintList: $("hintList"),
@@ -76,6 +78,7 @@ export function createUI() {
   let onExit = () => {};
   let onChoice = () => {};
   let onComp = () => {};
+  let onHintToggle = () => {};
   let onResultRetry = () => {};
   let onResultNext = () => {};
   let onResultMenu = () => {};
@@ -200,6 +203,11 @@ export function createUI() {
 
   function setPauseLabel(text) {
     if (el.pauseBtn) el.pauseBtn.textContent = text;
+  }
+
+  function setHintToggle(enabled) {
+    if (el.hintToggle) el.hintToggle.checked = Boolean(enabled);
+    if (el.hintToggleState) el.hintToggleState.textContent = enabled ? "ON" : "OFF";
   }
 
   function renderChoices(labels) {
@@ -435,6 +443,12 @@ export function createUI() {
   });
 
   el.startBtn?.addEventListener("click", () => onStart());
+  el.hintToggle?.addEventListener("change", (event) => {
+    const target = event.target;
+    const enabled = Boolean(target?.checked);
+    setHintToggle(enabled);
+    onHintToggle(enabled);
+  });
 
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
   el.restartBtn?.addEventListener("click", () => onRestart());
@@ -472,6 +486,7 @@ export function createUI() {
     showStartOverlay,
     hideStartOverlay,
     setPauseLabel,
+    setHintToggle,
     renderChoices,
     setHints,
     renderMultiChoices,
@@ -488,6 +503,7 @@ export function createUI() {
     onExit: (fn) => (onExit = fn),
     onChoice: (fn) => (onChoice = fn),
     onCompChoice: (fn) => (onComp = fn),
+    onHintToggle: (fn) => (onHintToggle = fn),
     onResultRetry: (fn) => (onResultRetry = fn),
     onResultNextStage: (fn) => (onResultNext = fn),
     onResultMenu: (fn) => (onResultMenu = fn),

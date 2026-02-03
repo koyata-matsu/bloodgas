@@ -55,7 +55,8 @@ export function createStage1() {
     needsComp: false,
     choices: CHOICES_STAGE1,
     hints: [
-      "pH / PaCO₂ / HCO₃⁻",
+      "pHでアシドーシス/アルカローシスを決める。",
+      "pH方向と一致するPaCO₂/HCO₃⁻を主病態にする。",
     ],
 
     lessonHTML: `

@@ -111,9 +111,6 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   flex-wrap:wrap;
   margin-bottom: 10px;
 }
-.stage1-mode .hud{
-  display: none;
-}
 .hudBox{
   background:#111;
   color:#fff;

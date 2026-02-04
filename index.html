@@ -112,26 +112,11 @@
         <div class="startBox">
           <h2 class="startTitle" id="startTitle">血ガスゲーム</h2>
           <p class="muted" id="startDesc">スタートして開始</p>
-          <div class="toggleRow">
-            <label class="toggleLabel" for="hintToggle">
-              <span>最初の10問ヒント</span>
-              <span class="toggleControl">
-                <input id="hintToggle" class="toggleInput" type="checkbox" />
-                <span class="toggleSlider" aria-hidden="true"></span>
-              </span>
-              <span id="hintToggleState" class="toggleState">ON</span>
-            </label>
-          </div>
           <button id="startBtn" class="btn">スタート</button>
         </div>
       </div>
 
       <div class="panel">
-        <div id="hintArea" class="hintArea hidden">
-          <div class="hintTitle">ヒント（最初の10問）</div>
-          <ul id="hintList" class="hintList"></ul>
-        </div>
-
         <div class="feedback" id="feedback"></div>
 
         <div class="choices" id="choices"></div>
@@ -173,6 +158,21 @@
           <button id="nextBtn" class="btn" disabled>次ステージへ</button>
           <button id="downloadLogBtn" class="btn ghost">ログCSV</button>
           <button id="menuBtn" class="btn ghost">メニューへ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="pauseModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modalBackdrop"></div>
+      <div class="modalCard">
+        <div class="modalTop">
+          <div class="rankTitle">一時停止中：知識メモ</div>
+        </div>
+        <div class="modalBody">
+          <div id="pauseContent" class="pauseContent"></div>
+        </div>
+        <div class="modalBtns">
+          <button id="pauseCloseBtn" class="btn">再開</button>
         </div>
       </div>
     </div>

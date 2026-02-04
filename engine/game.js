@@ -30,8 +30,6 @@ export function createGame({ ui, audio, stages }) {
     bgmMode: "early",
 
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
-
-    hintEnabled: true,
   };
 
   // callbacks
@@ -148,12 +146,6 @@ export function createGame({ ui, audio, stages }) {
     // fallback
     ui.renderChoices(["..."]);
     updateQuestionForTarget();
-  }
-
-  function updateHints() {
-    const hints = state.stage.hints || [];
-    const show = state.hintEnabled && state.spawnedCount <= 10;
-    ui.setHints(hints, show);
   }
 
   function updateQuestionForTarget() {
@@ -273,7 +265,6 @@ export function createGame({ ui, audio, stages }) {
     setHUD();
     cbFeedback("");
     ui.setLaneHeight(getMaxConcurrent());
-    updateHints();
     updateQuestionForTarget();
 
     // ★ここでchoicesを安全に描画
@@ -311,7 +302,6 @@ export function createGame({ ui, audio, stages }) {
 
     setBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
     forceRelayoutAll();
-    updateHints();
 
     // ★ターゲットが変わるので必ず更新
     updateChoicesForTarget();
@@ -668,11 +658,13 @@ export function createGame({ ui, audio, stages }) {
     state.paused = !state.paused;
     ui.setPauseLabel(state.paused ? "再開" : "一時停止");
     if (!state.paused) {
+      ui.hidePauseGuide();
       state.lastTs = null;
       audio.bgm(state.bgmMode);
       stop();
       state.rafId = requestAnimationFrame(loop);
     } else {
+      ui.showPauseGuide(state.stage);
       audio.pauseBGM();
       stop();
     }
@@ -709,9 +701,5 @@ export function createGame({ ui, audio, stages }) {
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
     onLog: (fn) => (cbLog = fn),
-    setHintEnabled: (enabled) => {
-      state.hintEnabled = Boolean(enabled);
-      updateHints();
-    },
   };
 }

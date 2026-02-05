@@ -457,6 +457,10 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 }
 .rankTitle{ font-size: 24px; font-weight: 900; }
 .modalBody{ padding: 10px 6px 2px; }
+
+.pauseContent .lessonBox{ margin-bottom: 10px; }
+.pauseContent .pauseHints h4{ margin: 8px 0 4px; font-size: 14px; }
+.pauseContent .pauseHints ul{ margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .scoreBig{ font-size: 44px; font-weight: 900; }
 .scoreSub{ margin-top: 6px; opacity:.75; }
 .unlockMsg{ margin-top: 12px; font-weight: 700; }

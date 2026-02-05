@@ -35,13 +35,12 @@ export function createUI() {
     startBtn: $("startBtn"),
     startTitle: $("startTitle"),
     startDesc: $("startDesc"),
-    hintToggle: $("hintToggle"),
-    hintToggleState: $("hintToggleState"),
-
-    hintArea: $("hintArea"),
-    hintList: $("hintList"),
 
     judgeFx: $("judgeFx"),
+
+    pauseModal: $("pauseModal"),
+    pauseContent: $("pauseContent"),
+    pauseCloseBtn: $("pauseCloseBtn"),
 
     resultModal: $("resultModal"),
     rankTitle: $("rankTitle"),
@@ -78,7 +77,6 @@ export function createUI() {
   let onExit = () => {};
   let onChoice = () => {};
   let onComp = () => {};
-  let onHintToggle = () => {};
   let onResultRetry = () => {};
   let onResultNext = () => {};
   let onResultMenu = () => {};
@@ -205,11 +203,6 @@ export function createUI() {
     if (el.pauseBtn) el.pauseBtn.textContent = text;
   }
 
-  function setHintToggle(enabled) {
-    if (el.hintToggle) el.hintToggle.checked = Boolean(enabled);
-    if (el.hintToggleState) el.hintToggleState.textContent = enabled ? "ON" : "OFF";
-  }
-
   function renderChoices(labels) {
     if (!el.choices) return;
     el.choices.innerHTML = "";
@@ -222,20 +215,20 @@ export function createUI() {
     });
   }
 
-  function setHints(hints, show) {
-    if (!el.hintArea || !el.hintList) return;
-    if (!Array.isArray(hints) || hints.length === 0) {
-      el.hintArea.classList.add("hidden");
-      el.hintList.innerHTML = "";
-      return;
-    }
-    el.hintList.innerHTML = "";
-    hints.forEach((text) => {
-      const li = document.createElement("li");
-      li.textContent = text;
-      el.hintList.appendChild(li);
-    });
-    el.hintArea.classList.toggle("hidden", !show);
+  function showPauseGuide(stage) {
+    if (!el.pauseModal || !el.pauseContent) return;
+    const hints = Array.isArray(stage?.hints) ? stage.hints : [];
+    const hintHtml = hints.length
+      ? `<div class="pauseHints"><h4>ヒント</h4><ul>${hints.map((text) => `<li>${text}</li>`).join("")}</ul></div>`
+      : "";
+    const lessonHtml = stage?.lessonHTML || "<p>このステージの解説はありません。</p>";
+    el.pauseContent.innerHTML = `${lessonHtml}${hintHtml}`;
+    el.pauseModal.classList.remove("hidden");
+  }
+
+  function hidePauseGuide() {
+    if (!el.pauseModal) return;
+    el.pauseModal.classList.add("hidden");
   }
 
   function renderMultiChoices(labels, submitLabel = "決定") {
@@ -443,14 +436,9 @@ export function createUI() {
   });
 
   el.startBtn?.addEventListener("click", () => onStart());
-  el.hintToggle?.addEventListener("change", (event) => {
-    const target = event.target;
-    const enabled = Boolean(target?.checked);
-    setHintToggle(enabled);
-    onHintToggle(enabled);
-  });
 
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
+  el.pauseCloseBtn?.addEventListener("click", () => onPauseToggle());
   el.restartBtn?.addEventListener("click", () => onRestart());
   el.exitBtn?.addEventListener("click", () => onExit());
 
@@ -462,6 +450,7 @@ export function createUI() {
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
+  el.pauseModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => onPauseToggle());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -486,11 +475,11 @@ export function createUI() {
     showStartOverlay,
     hideStartOverlay,
     setPauseLabel,
-    setHintToggle,
     renderChoices,
-    setHints,
     renderMultiChoices,
     showCompButtons,
+    showPauseGuide,
+    hidePauseGuide,
     createCardElement,
     updateCardElement,
     showResult,
@@ -503,7 +492,6 @@ export function createUI() {
     onExit: (fn) => (onExit = fn),
     onChoice: (fn) => (onChoice = fn),
     onCompChoice: (fn) => (onComp = fn),
-    onHintToggle: (fn) => (onHintToggle = fn),
     onResultRetry: (fn) => (onResultRetry = fn),
     onResultNextStage: (fn) => (onResultNext = fn),
     onResultMenu: (fn) => (onResultMenu = fn),

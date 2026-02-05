@@ -13,7 +13,6 @@ import { loadStage6Cases } from "./stages/stage6_cases.js";
 
 const LS_UNLOCK_KEY = "bg_unlocked_stage_max";
 const LS_CLEARED_KEY = "bg_cleared_stage_ids_v1";
-const LS_HINT_KEY = "bg_hint_first10";
 
 let ui;
 let audio;
@@ -284,14 +283,6 @@ function setUnlockedMax(v) {
   localStorage.setItem(LS_UNLOCK_KEY, String(safe));
 }
 
-function getHintEnabled() {
-  return localStorage.getItem(LS_HINT_KEY) !== "0";
-}
-
-function setHintEnabled(v) {
-  localStorage.setItem(LS_HINT_KEY, v ? "1" : "0");
-}
-
 function loadClearedStageIds() {
   try {
     const raw = localStorage.getItem(LS_CLEARED_KEY);
@@ -364,9 +355,7 @@ async function initApp() {
   // ---- menu stage selection ----
   ui.onSelectStage((stageId) => {
     selectedStageId = stageId;
-    const hintEnabled = getHintEnabled();
-    ui.setHintToggle(hintEnabled);
-    game.setHintEnabled(hintEnabled);
+    ui.setPauseLabel("一時停止");
     game.setStage(stageId);
     applyStageMeta(stageId);
     audio.stopBGM();
@@ -387,11 +376,6 @@ async function initApp() {
   });
 
   ui.onPauseToggle(() => game.togglePause());
-  ui.onHintToggle((enabled) => {
-    setHintEnabled(enabled);
-    game.setHintEnabled(enabled);
-  });
-
   ui.onRestart(() => {
     startRunSession();
     game.prepareRun();
@@ -517,9 +501,7 @@ async function initApp() {
   // init
   refreshStageButtons();
   applyStageMeta(1);
-  const hintEnabled = getHintEnabled();
-  ui.setHintToggle(hintEnabled);
-  game.setHintEnabled(hintEnabled);
+  ui.setPauseLabel("一時停止");
   ui.showScreen("menu");
 }
 

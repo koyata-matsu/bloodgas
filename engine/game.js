@@ -216,11 +216,13 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function setHUD() {
-    const isClearFinite = Number.isFinite(state.stage.clearCount);
-    const remainClear = isClearFinite
-      ? Math.max(0, state.stage.clearCount - state.correct)
+    const clearTarget = Number.isFinite(state.stage.clearCount)
+      ? state.stage.clearCount
+      : (Number.isFinite(state.stage.unlockNeed) ? state.stage.unlockNeed : null);
+    const remainClear = Number.isFinite(clearTarget)
+      ? Math.max(0, clearTarget - state.correct)
       : null;
-    const clearText = isClearFinite
+    const clearText = Number.isFinite(remainClear)
       ? (remainClear === 0 ? "クリア達成！" : `クリアまであと ${remainClear}問`)
       : "クリアまであと何問";
     cbHUD({
@@ -388,9 +390,7 @@ export function createGame({ ui, audio, stages }) {
 
     const cleared = Number.isFinite(state.stage.clearCount)
       && state.correct >= state.stage.clearCount;
-    if (cleared) {
-      cbSfx("finish");
-    } else if (reason !== "manual") {
+    if (!cleared && reason !== "manual") {
       cbSfx("gameover");
     }
 
@@ -484,7 +484,8 @@ export function createGame({ ui, audio, stages }) {
         state.stage.advanceQuestion(card.q);
         ui.updateCardElement(card.el, card.q);
         if (result.resetCard) {
-          const startX = ui.el.lane.clientWidth + 30;
+          const cardWidth = card.el?.getBoundingClientRect().width || 0;
+          const startX = ui.el.lane.clientWidth + cardWidth / 2;
           const baseLeft = card.baseLeft || 0;
           card.x = startX - baseLeft;
           card.bornAt = performance.now();

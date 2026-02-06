@@ -372,7 +372,9 @@ async function initApp() {
     audio.unlockByGesture();
     audio.click();
     ui.hideStartOverlay();
-    game.startRun();
+    ui.showLessonIntro(game.stage, () => {
+      game.startRun();
+    });
   });
 
   ui.onPauseToggle(() => game.togglePause());

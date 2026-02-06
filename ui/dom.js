@@ -39,6 +39,7 @@ export function createUI() {
     judgeFx: $("judgeFx"),
 
     pauseModal: $("pauseModal"),
+    pauseTitle: document.querySelector("#pauseModal .rankTitle"),
     pauseContent: $("pauseContent"),
     pauseCloseBtn: $("pauseCloseBtn"),
 
@@ -73,6 +74,7 @@ export function createUI() {
   let onSelectStage = () => {};
   let onStart = () => {};
   let onPauseToggle = () => {};
+  let onPauseAction = () => onPauseToggle();
   let onRestart = () => {};
   let onExit = () => {};
   let onChoice = () => {};
@@ -223,12 +225,32 @@ export function createUI() {
       : "";
     const lessonHtml = stage?.lessonHTML || "<p>このステージの解説はありません。</p>";
     el.pauseContent.innerHTML = `${lessonHtml}${hintHtml}`;
+    if (el.pauseTitle) el.pauseTitle.textContent = "一時停止中：知識メモ";
+    if (el.pauseCloseBtn) el.pauseCloseBtn.textContent = "再開";
+    onPauseAction = () => onPauseToggle();
     el.pauseModal.classList.remove("hidden");
   }
 
   function hidePauseGuide() {
     if (!el.pauseModal) return;
     el.pauseModal.classList.add("hidden");
+  }
+
+  function showLessonIntro(stage, onConfirm) {
+    if (!el.pauseModal || !el.pauseContent) return;
+    const hints = Array.isArray(stage?.hints) ? stage.hints : [];
+    const hintHtml = hints.length
+      ? `<div class="pauseHints"><h4>ヒント</h4><ul>${hints.map((text) => `<li>${text}</li>`).join("")}</ul></div>`
+      : "";
+    const lessonHtml = stage?.lessonHTML || "<p>このステージの解説はありません。</p>";
+    el.pauseContent.innerHTML = `${lessonHtml}${hintHtml}`;
+    if (el.pauseTitle) el.pauseTitle.textContent = "開始前：解説";
+    if (el.pauseCloseBtn) el.pauseCloseBtn.textContent = "スタート";
+    onPauseAction = () => {
+      hidePauseGuide();
+      onConfirm?.();
+    };
+    el.pauseModal.classList.remove("hidden");
   }
 
   function renderMultiChoices(labels, submitLabel = "決定") {
@@ -444,7 +466,7 @@ export function createUI() {
   el.startBtn?.addEventListener("click", () => onStart());
 
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
-  el.pauseCloseBtn?.addEventListener("click", () => onPauseToggle());
+  el.pauseCloseBtn?.addEventListener("click", () => onPauseAction());
   el.restartBtn?.addEventListener("click", () => onRestart());
   el.exitBtn?.addEventListener("click", () => onExit());
 
@@ -456,7 +478,7 @@ export function createUI() {
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
-  el.pauseModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => onPauseToggle());
+  el.pauseModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => onPauseAction());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -486,6 +508,7 @@ export function createUI() {
     showCompButtons,
     showPauseGuide,
     hidePauseGuide,
+    showLessonIntro,
     createCardElement,
     updateCardElement,
     showResult,

@@ -200,6 +200,7 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 .questionText{
   font-size: 16px;
   color: #111827;
+  white-space: pre-wrap;
 }
 .stage6-mode .wrap {
   max-width: 100%;
@@ -275,7 +276,7 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   position: absolute;
   box-sizing: border-box;
   border-radius: 14px;
-  transition: transform 120ms linear;
+  transition: none;
 }
 .qOne{
   background:#f3f5ff;
@@ -287,6 +288,15 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+.qRow{
+  display:flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.qRow + .qRow{
+  margin-top: 2px;
 }
 .qItem b{ font-weight: 700; }
 .qSep{ opacity: .45; }
@@ -457,6 +467,10 @@ h3 { margin: 0 0 6px; font-size: 15px; }
 }
 .rankTitle{ font-size: 24px; font-weight: 900; }
 .modalBody{ padding: 10px 6px 2px; }
+
+.pauseContent .lessonBox{ margin-bottom: 10px; }
+.pauseContent .pauseHints h4{ margin: 8px 0 4px; font-size: 14px; }
+.pauseContent .pauseHints ul{ margin: 0; padding-left: 18px; display: grid; gap: 4px; }
 .scoreBig{ font-size: 44px; font-weight: 900; }
 .scoreSub{ margin-top: 6px; opacity:.75; }
 .unlockMsg{ margin-top: 12px; font-weight: 700; }
@@ -495,6 +509,7 @@ audio{ display:none; }
 
 @media (max-width: 430px) {
   .wrap { padding: 16px; }
+  #screenGame { min-height: 100vh; }
   h1 { font-size: 24px; }
   h2 { font-size: 20px; }
   h3 { font-size: 17px; }
@@ -517,10 +532,11 @@ audio{ display:none; }
   .questionText { font-size: 16px; }
   .stage6-mode .questionArea { padding: 12px 14px; }
   .stage6-mode .questionText { font-size: 17px; }
-  .lane { height: 140px; margin-bottom: 8px; }
-  .qOne { font-size: 14px; padding: 8px; gap: 6px; }
-  .stage1-mode .qOne { flex-direction: column; align-items: flex-start; }
-  .stage1-mode .qOne .qSep { display: none; }
+  .lane { height: 180px; margin-bottom: 8px; }
+  .qOne { font-size: 14px; padding: 8px; gap: 6px; flex-direction: column; align-items: flex-start; }
+  .qRow,
+  .caseRow { flex-direction: column; align-items: flex-start; }
+  .qSep { display: none; }
   .qOne.case { font-size: 14px; }
   .unit { font-size: 13px; }
   .hintArea,

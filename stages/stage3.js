@@ -93,7 +93,7 @@ function makeQ_type2_corrAG(){
 }
 
 function makeQ_type3_corrHCO3(){
-  const corrAg = to1(randInt(12,35));     // 補正AGを与える
+  const corrAg = to1(randInt(15,35));     // 補正AGを与える（14以下にしない）
   const hco3 = to1(randInt(4,28));        // HCO3を与える
   const corrHco3 = to1(calcCorrHCO3(hco3, corrAg));
   let correctLabel = "純粋なAG開大型";
@@ -108,7 +108,7 @@ function makeQ_type3_corrHCO3(){
 
   return {
     kind: "judge",
-    prompt: "AG開大性代謝性アシドーシスがある。補正AG:◯ HCO3:◯ 補正HCO3を計算し、合併する病態を選べ。",
+    prompt: "補正AG:〇〇、HCO3：〇〇\n補正HCO3から鑑別せよ",
     items: [
       { k:"補正AG", v: corrAg.toFixed(1) },
       { k:"HCO3", v: hco3.toFixed(1) },

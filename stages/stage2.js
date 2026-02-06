@@ -176,7 +176,11 @@ export function createStage2() {
           correct,
           done: false,
           pauseAfterCorrect: correct,
+<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
           pauseSeconds,
+=======
+          pauseSeconds: 8,
+>>>>>>> main
           explanation,
           correctLabel: label,
         };
@@ -194,7 +198,10 @@ export function createStage2() {
     },
     advanceQuestion(q) {
       q.step = 1;
-      pauseSeconds = Math.max(5, pauseSeconds - 0.5);
+<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
+      pauseSeconds = Math.max(8, pauseSeconds - 0.5);
+=======
+>>>>>>> main
     },
   };
 }

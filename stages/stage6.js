@@ -231,9 +231,9 @@ export function createStage6(cases = CASES) {
     staticQuestion: true,
     questionMode: true,
     centerCards: true,
-    timeLimitStart: 50,
-    timeLimitMin: 20,
-    timeLimitDecay: 2,
+    timeLimitStart: 10,
+    timeLimitMin: 3,
+    timeLimitDecay: 0.8,
 
     nextQuestion() {
       if (idx >= bank.length) {

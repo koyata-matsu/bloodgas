@@ -357,20 +357,26 @@ export function createUI() {
     }
 
     // 既存：pH/PaCO2/HCO3（必要ならAG追加）
-    const agHtml = q.ag !== undefined
-      ? `
-        <span class="qSep">/</span>
-        <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
-      `
-      : "";
-    card.innerHTML = `
-      <div class="qOne">
+    const row1 = `
+      <div class="qRow">
         <span class="qItem ph"><b>pH</b> <span class="vph">${Number(q.ph).toFixed(2)}</span></span>
         <span class="qSep">/</span>
         <span class="qItem co2"><b>PaCO₂</b> <span class="vpco2">${q.paco2}</span> <span class="unit">mmHg</span></span>
         <span class="qSep">/</span>
         <span class="qItem hco3"><b>HCO₃⁻</b> <span class="vhco3">${q.hco3}</span> <span class="unit">mEq/L</span></span>
-        ${agHtml}
+      </div>
+    `;
+    const row2 = q.ag !== undefined
+      ? `
+        <div class="qRow">
+          <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
+        </div>
+      `
+      : "";
+    card.innerHTML = `
+      <div class="qOne">
+        ${row1}
+        ${row2}
       </div>
       <div class="qIcon" aria-hidden="true">🚑</div>
     `;

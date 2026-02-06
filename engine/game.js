@@ -483,6 +483,13 @@ export function createGame({ ui, audio, stages }) {
       if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
         state.stage.advanceQuestion(card.q);
         ui.updateCardElement(card.el, card.q);
+        if (result.resetCard) {
+          const startX = ui.el.lane.clientWidth + 30;
+          const baseLeft = card.baseLeft || 0;
+          card.x = startX - baseLeft;
+          card.bornAt = performance.now();
+          card.el.style.transform = `translateX(${card.x}px)`;
+        }
         updateChoicesForTarget();
         return;
       }

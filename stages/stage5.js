@@ -35,7 +35,10 @@ export function createStage5() {
     clearCount: Infinity,
     overlapStart: 14,
     needsComp: false,
-    choices: CHOICES_STAGE5,
+    staticQuestion: true,
+    timeLimitStart: 10,
+    timeLimitMin: 3,
+    timeLimitDecay: 0.8,
     hints: [
       "pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 10–14",
     ],
@@ -98,10 +101,14 @@ export function createStage5() {
         idx = 0;
       }
       const q = bank[idx++];
+      const labels = shuffle([...CHOICES_STAGE5]);
+      const correctIndex = labels.indexOf(CHOICES_STAGE5[q.ans]);
       return {
         kind: "topic",
         prompt: "次に確認すべき項目は？",
         items: [{ k: "病態", v: q.condition }],
+        choices: labels,
+        correctIndex,
         ans: q.ans,
       };
     },
@@ -110,9 +117,13 @@ export function createStage5() {
       return (correct >= 9 || spawnedCount >= 9) ? 2 : 1;
     },
 
+    getChoices(q) {
+      return q.choices;
+    },
+
     checkChoice(q, choiceIdx) {
-      const correct = choiceIdx === q.ans;
-      const label = CHOICES_STAGE5[q.ans];
+      const correct = choiceIdx === q.correctIndex;
+      const label = q.choices[q.correctIndex];
       const explanation = CONDITION_EXPLAIN[q.items[0].v] || "病態ごとの優先検査を確認。";
       return {
         correct,

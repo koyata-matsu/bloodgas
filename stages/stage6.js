@@ -375,6 +375,7 @@ export function createStage6(cases = CASES) {
     timeLimitStart: 10,
     timeLimitMin: 3,
     timeLimitDecay: 0.8,
+    timeLimitRecover: 0.8,
 
     nextQuestion() {
       if (idx >= bank.length) {

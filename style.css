@@ -210,6 +210,9 @@ h3 { margin: 0 0 6px; font-size: 15px; }
   border-color: #d9dbe8;
   padding: 18px 20px;
 }
+.stage6-mode .timeBar{
+  display: none;
+}
 .stage6-mode .questionHeader{
   text-align: left;
   gap: 10px;

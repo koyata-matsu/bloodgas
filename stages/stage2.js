@@ -174,7 +174,8 @@ export function createStage2() {
         return {
           correct,
           done: false,
-          resetCard: correct,
+          pauseAfterCorrect: correct,
+          pauseSeconds: 5,
           explanation,
           correctLabel: label,
         };

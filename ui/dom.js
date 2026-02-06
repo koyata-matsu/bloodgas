@@ -426,7 +426,7 @@ export function createUI() {
     if (!el.resultModal) return;
     el.resultModal.classList.remove("hidden");
 
-    if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "✅ ステージクリア！" : "💀 ゲームオーバー";
+    if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "ステージクリア！！" : "💀 ゲームオーバー";
     if (el.scoreNum) {
       const clearCount = result.clearCount;
       const scoreText = Number.isFinite(clearCount)

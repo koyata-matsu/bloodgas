@@ -4,22 +4,21 @@ import { shuffle, randInt } from "../utils/rand.js";
  * Stage2: 代謝性の代償（マジックナンバー15）
  * 予測PaCO2 = HCO3 + 15
  *
- * 選択肢（6つ固定）
- * 0: 代謝性アシドーシス　合併なし
- * 1: 代謝性アシドーシス＋呼吸性アルカローシス合併
- * 2: AG開大型代謝性アシドーシス　合併なし
- * 3: AG開大型代謝性アシドーシス＋呼吸性アルカローシス合併
- * 4: 代謝性アルカローシス　合併なし
- * 5: 代謝性アルカローシス＋呼吸性アシドーシス合併
+ * 二段階（同一問題を続けて判定）
+ * 1) 病態分類（3択）
+ * 2) 呼吸性合併（3択）
  */
 
-const CHOICES_STAGE2 = [
-  "代謝性アシドーシス　合併なし",
-  "代謝性アシドーシス＋呼吸性アルカローシス合併",
-  "AG開大型代謝性アシドーシス　合併なし",
-  "AG開大型代謝性アシドーシス＋呼吸性アルカローシス合併",
-  "代謝性アルカローシス　合併なし",
-  "代謝性アルカローシス＋呼吸性アシドーシス合併",
+const CHOICES_STAGE2_BASE = [
+  "AG非開大性代謝性アシドーシス",
+  "AG開大性代謝性アシドーシス",
+  "代謝性アルカローシス",
+];
+
+const CHOICES_STAGE2_COMP = [
+  "合併なし",
+  "呼吸性アシドーシスの合併",
+  "呼吸性アルカローシスの合併",
 ];
 
 const TOL = 1; // 「実測＝予測」扱いの許容幅（±）
@@ -40,7 +39,9 @@ function getCompStatus(actual, predicted) {
 
 function makeBank() {
   const bank = [];
-  const push = (ph, paco2, hco3, ag, ans) => bank.push({ ph, paco2, hco3, ag, ans });
+  const push = (ph, paco2, hco3, ag, baseKind, compKind) => (
+    bank.push({ ph, paco2, hco3, ag, baseKind, compKind, step: 0 })
+  );
   const normalAg = () => randInt(10, 14);
   const highAg = () => randInt(16, 28);
 
@@ -51,7 +52,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = pred + randInt(-TOL, TOL);
     const ph = Number((7.40 - (24 - hco3) * 0.015).toFixed(2));
-    push(ph, paco2, hco3, normalAg(), 0);
+    push(ph, paco2, hco3, normalAg(), "nagma", "none");
   }
   // 呼吸性アルカローシス合併：PaCO2 < pred（正常AG）
   for (let i = 0; i < 60; i++) {
@@ -59,7 +60,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = Math.max(10, pred - randInt(6, 14));
     const ph = Number((7.40 - (24 - hco3) * 0.015).toFixed(2));
-    push(ph, paco2, hco3, normalAg(), 1);
+    push(ph, paco2, hco3, normalAg(), "nagma", "resp_alk");
   }
   // 合併なし：PaCO2 ≈ pred（AG上昇）
   for (let i = 0; i < 60; i++) {
@@ -67,7 +68,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = pred + randInt(-TOL, TOL);
     const ph = Number((7.40 - (24 - hco3) * 0.015).toFixed(2));
-    push(ph, paco2, hco3, highAg(), 2);
+    push(ph, paco2, hco3, highAg(), "agma", "none");
   }
   // 呼吸性アルカローシス合併：PaCO2 < pred（AG上昇）
   for (let i = 0; i < 60; i++) {
@@ -75,7 +76,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = Math.max(10, pred - randInt(6, 14));
     const ph = Number((7.40 - (24 - hco3) * 0.015).toFixed(2));
-    push(ph, paco2, hco3, highAg(), 3);
+    push(ph, paco2, hco3, highAg(), "agma", "resp_alk");
   }
 
   // ---- Metabolic Alkalosis ----
@@ -85,7 +86,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = pred + randInt(-TOL, TOL);
     const ph = Number((7.40 + (hco3 - 24) * 0.010).toFixed(2));
-    push(ph, paco2, hco3, normalAg(), 4);
+    push(ph, paco2, hco3, normalAg(), "alk", "none");
   }
   // 呼吸性アシドーシス合併：PaCO2 > pred
   for (let i = 0; i < 60; i++) {
@@ -93,7 +94,7 @@ function makeBank() {
     const pred = predPaCO2(hco3);
     const paco2 = pred + randInt(6, 14);
     const ph = Number((7.40 + (hco3 - 24) * 0.010).toFixed(2));
-    push(ph, paco2, hco3, normalAg(), 5);
+    push(ph, paco2, hco3, normalAg(), "alk", "resp_acid");
   }
 
   return shuffle(bank);
@@ -106,11 +107,12 @@ export function createStage2() {
   return {
     id: 3,
     name: "ステージ2：代謝性の代償と合併",
-    unlockNeed: 30,
-    clearCount: Infinity,
+    unlockNeed: null,
+    clearCount: 30,
     overlapStart: 14,
-
-    choices: CHOICES_STAGE2,
+    getChoices(q) {
+      return q?.step === 1 ? CHOICES_STAGE2_COMP : CHOICES_STAGE2_BASE;
+    },
     hints: [
       "予測PaCO₂ = HCO₃⁻ + 15（±1）",
     ],
@@ -148,29 +150,49 @@ export function createStage2() {
       </div>
     `,
 
-    startDesc: "HCO₃⁻ + 15 で予測PaCO₂を出し、代償の適切さと合併を6択で判定。",
+    startDesc: "まずAG/代謝性アシドーシス・アルカローシスを判定 → 次に呼吸性の合併を判定。",
 
     nextQuestion() {
       if (idx >= bank.length) {
         bank = shuffle(bank);
         idx = 0;
       }
-      return bank[idx++];
+      const q = bank[idx++];
+      q.step = 0;
+      return q;
     },
 
     checkChoice(q, choiceIdx) {
-      const correct = choiceIdx === q.ans;
       const pred = predPaCO2(q.hco3);
       const comp = getCompStatus(q.paco2, pred);
       const agStatus = getAgStatus(q.ag);
-      const label = CHOICES_STAGE2[q.ans];
-      const explanation = `予測PaCO₂=${q.hco3}+15=${pred}、実測${q.paco2}で${comp}。` +
-        `AG${q.ag}で${agStatus}。`;
+      if (q.step === 0) {
+        const expected = q.baseKind === "nagma" ? 0 : q.baseKind === "agma" ? 1 : 2;
+        const correct = choiceIdx === expected;
+        const label = CHOICES_STAGE2_BASE[expected];
+        const explanation = `AG${q.ag}で${agStatus}。`;
+        return {
+          correct,
+          done: false,
+          pauseAfterCorrect: correct,
+          pauseSeconds: 5,
+          explanation,
+          correctLabel: label,
+        };
+      }
+
+      const expected = q.compKind === "none" ? 0 : q.compKind === "resp_acid" ? 1 : 2;
+      const correct = choiceIdx === expected;
+      const label = CHOICES_STAGE2_COMP[expected];
+      const explanation = `予測PaCO₂=${q.hco3}+15=${pred}、実測${q.paco2}で${comp}。`;
       return {
         correct,
         explanation,
         correctLabel: label,
       };
+    },
+    advanceQuestion(q) {
+      q.step = 1;
     },
   };
 }

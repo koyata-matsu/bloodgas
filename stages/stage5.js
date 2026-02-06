@@ -14,6 +14,8 @@ const QUESTION_BANK = [
   { condition: "代謝性アルカローシス", ans: 2 },
   { condition: "呼吸性アシドーシス", ans: 3 },
   { condition: "呼吸性アルカローシス", ans: 4 },
+  { condition: "AG開大型代謝性アシドーシス（重症）", multi: true, corrects: [0, 4] },
+  { condition: "呼吸性アルカローシス（敗血症疑い）", multi: true, corrects: [4, 0] },
 ];
 
 const CONDITION_EXPLAIN = {
@@ -28,6 +30,26 @@ export function createStage5() {
   let bank = shuffle([...QUESTION_BANK]);
   let idx = 0;
 
+  function buildQuestionText(items) {
+    return [
+      "【設問】次に確認すべき項目は？",
+      `【病態】${items[0]?.v || ""}`,
+    ].join("\n");
+  }
+
+  function normalizeSelection(selection) {
+    if (Array.isArray(selection)) return selection;
+    if (Number.isInteger(selection)) return [selection];
+    return [];
+  }
+
+  function sameIndexSet(a, b) {
+    if (a.length !== b.length) return false;
+    const setA = new Set(a);
+    for (const item of b) if (!setA.has(item)) return false;
+    return true;
+  }
+
   return {
     id: 6,
     name: "ステージ5：原因検索の優先順位",
@@ -36,6 +58,7 @@ export function createStage5() {
     overlapStart: 14,
     needsComp: false,
     staticQuestion: true,
+    questionMode: true,
     timeLimitStart: 10,
     timeLimitMin: 3,
     timeLimitDecay: 0.8,
@@ -102,12 +125,31 @@ export function createStage5() {
       }
       const q = bank[idx++];
       const labels = shuffle([...CHOICES_STAGE5]);
-      const correctIndex = labels.indexOf(CHOICES_STAGE5[q.ans]);
+      const choices = labels;
+      const items = [{ k: "病態", v: q.condition }];
+      if (q.multi) {
+        const correctIndexes = q.corrects
+          .map((idx) => choices.indexOf(CHOICES_STAGE5[idx]))
+          .filter((idx) => idx >= 0);
+        const questionText = buildQuestionText(items);
+        return {
+          kind: "topic",
+          prompt: "次に確認すべき項目は？",
+          questionText,
+          items,
+          choices,
+          multi: true,
+          correctIndexes,
+        };
+      }
+      const correctIndex = choices.indexOf(CHOICES_STAGE5[q.ans]);
+      const questionText = buildQuestionText(items);
       return {
         kind: "topic",
         prompt: "次に確認すべき項目は？",
-        items: [{ k: "病態", v: q.condition }],
-        choices: labels,
+        questionText,
+        items,
+        choices,
         correctIndex,
         ans: q.ans,
       };
@@ -118,10 +160,22 @@ export function createStage5() {
     },
 
     getChoices(q) {
+      if (q.multi) return { labels: q.choices, multi: true, submitLabel: "決定" };
       return q.choices;
     },
 
     checkChoice(q, choiceIdx) {
+      if (q.multi) {
+        const selected = normalizeSelection(choiceIdx);
+        const correct = sameIndexSet(selected, q.correctIndexes);
+        const label = q.correctIndexes.map(idx => q.choices[idx]).filter(Boolean).join(" / ");
+        const explanation = CONDITION_EXPLAIN[q.items[0].v] || "病態ごとの優先検査を確認。";
+        return {
+          correct,
+          explanation,
+          correctLabel: label,
+        };
+      }
       const correct = choiceIdx === q.correctIndex;
       const label = q.choices[q.correctIndex];
       const explanation = CONDITION_EXPLAIN[q.items[0].v] || "病態ごとの優先検査を確認。";

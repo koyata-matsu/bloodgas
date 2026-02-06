@@ -16,6 +16,7 @@ export function createUI() {
     questionArea: $("questionArea"),
     questionStep: $("questionStep"),
     questionText: $("questionText"),
+    timeCount: $("timeCount"),
     timeFill: $("timeFill"),
 
     lane: document.querySelector(".lane"),
@@ -162,6 +163,15 @@ export function createUI() {
     if (!el.timeFill) return;
     const safeRatio = Math.max(0, Math.min(1, ratio));
     el.timeFill.style.transform = `scaleX(${safeRatio})`;
+  }
+
+  function setTimerText(seconds) {
+    if (!el.timeCount) return;
+    if (!Number.isFinite(seconds)) {
+      el.timeCount.textContent = "";
+      return;
+    }
+    el.timeCount.textContent = `${Math.ceil(seconds)}s`;
   }
 
   function shakeHP() {
@@ -497,6 +507,7 @@ export function createUI() {
     setQuestionText,
     setQuestionStep,
     setTimerProgress,
+    setTimerText,
     shakeHP,
     setFeedback,
     showJudge,

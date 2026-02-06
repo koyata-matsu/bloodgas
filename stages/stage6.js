@@ -373,7 +373,7 @@ export function createStage6(cases = CASES) {
     questionMode: true,
     centerCards: true,
     timeLimitStart: 10,
-    timeLimitMin: 3,
+    timeLimitMin: 7,
     timeLimitDecay: 0.8,
     timeLimitRecover: 0.8,
 

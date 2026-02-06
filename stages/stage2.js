@@ -103,6 +103,7 @@ function makeBank() {
 export function createStage2() {
   let bank = makeBank();
   let idx = 0;
+  let pauseSeconds = 8;
 
   return {
     id: 3,
@@ -118,8 +119,8 @@ export function createStage2() {
     ],
 
     // 10問目以降から2レーン
-    maxConcurrent(correct, spawnedCount) {
-      return (correct >= 9 || spawnedCount >= 9) ? 2 : 1;
+    maxConcurrent() {
+      return 1;
     },
 
     lessonHTML: `
@@ -175,7 +176,11 @@ export function createStage2() {
           correct,
           done: false,
           pauseAfterCorrect: correct,
-          pauseSeconds: 5,
+<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
+          pauseSeconds,
+=======
+          pauseSeconds: 8,
+>>>>>>> main
           explanation,
           correctLabel: label,
         };
@@ -193,6 +198,10 @@ export function createStage2() {
     },
     advanceQuestion(q) {
       q.step = 1;
+<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
+      pauseSeconds = Math.max(8, pauseSeconds - 0.5);
+=======
+>>>>>>> main
     },
   };
 }

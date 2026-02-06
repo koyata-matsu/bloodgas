@@ -198,7 +198,11 @@ export function createStage3(){
         correctLabel = q.options[q.correctIndex].toFixed(1);
       } else if (q.kind === "calc") {
         const calc = q.calc || {};
-        explanation = `補正AG=${calc.ag.toFixed(1)}+2.5×(4.0-${calc.alb.toFixed(1)})=${q.correctValue.toFixed(1)}。`;
+        if (calc.alb >= 4) {
+          explanation = "補正AGの計算は不要。";
+        } else {
+          explanation = `補正AG=${calc.ag.toFixed(1)}+2.5×(4.0-${calc.alb.toFixed(1)})=${q.correctValue.toFixed(1)}。`;
+        }
         correctLabel = q.options[q.correctIndex].toFixed(1);
       } else {
         const corr = q.correctValue;

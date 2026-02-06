@@ -273,6 +273,7 @@ export function createGame({ ui, audio, stages }) {
     setHP(state.hp, null);
     setHUD();
     cbFeedback("");
+    ui.setTimerText(null);
     ui.setLaneHeight(getMaxConcurrent());
     updateQuestionForTarget();
 
@@ -602,13 +603,25 @@ export function createGame({ ui, audio, stages }) {
         const elapsed = (performance.now() - t.bornAt) / 1000;
         const timeLeft = Math.max(0, state.timeLimitSec - elapsed);
         ui.setTimerProgress(timeLeft / Math.max(0.001, state.timeLimitSec));
+        ui.setTimerText(timeLeft);
         if (timeLeft <= 0) {
-          handleWrong("時間切れ！", 12);
+          const missInfo = getCorrectInfoForQuestion(t.q);
+          const feedbackText = missInfo.explanation
+            ? `ミス！ ${missInfo.explanation}`
+            : "ミス！";
+          handleWrong(feedbackText, 12, {
+            outcome: "timeout",
+            q: t.q,
+            elapsedSec: elapsed,
+            correctLabel: missInfo.correctLabel,
+            explanation: missInfo.explanation,
+          });
           if (state.running && !state.paused) state.rafId = requestAnimationFrame(loop);
           return;
         }
       } else {
         ui.setTimerProgress(1);
+        ui.setTimerText(null);
       }
       forceRelayoutAll();
       state.rafId = requestAnimationFrame(loop);
@@ -632,19 +645,26 @@ export function createGame({ ui, audio, stages }) {
     const tIdx = pickTargetIndex(state.cards);
     if (tIdx >= 0) {
       const t = state.cards[tIdx];
+      const elapsedSec = (performance.now() - t.bornAt) / 1000;
+      const timeLeft = Math.max(0, state.timeLimitSec - elapsedSec);
+      ui.setTimerText(timeLeft);
       if (t.pauseUntil) {
         if (now >= t.pauseUntil) {
           t.pauseUntil = null;
-          const elapsedSec = (performance.now() - t.bornAt) / 1000;
-          handleWrong("時間切れ！", 12, {
+          const missInfo = getCorrectInfoForQuestion(t.q);
+          const feedbackText = missInfo.explanation
+            ? `ミス！ ${missInfo.explanation}`
+            : "ミス！";
+          handleWrong(feedbackText, 12, {
             outcome: "timeout",
             q: t.q,
             elapsedSec,
+            correctLabel: missInfo.correctLabel,
+            explanation: missInfo.explanation,
           });
         }
       } else
       if (effectiveX(t) <= ui.layout.MISS_X) {
-        const elapsedSec = (performance.now() - t.bornAt) / 1000;
         const missInfo = getCorrectInfoForQuestion(t.q);
         const feedbackText = missInfo.explanation
           ? `ミス！ ${missInfo.explanation}`
@@ -658,6 +678,7 @@ export function createGame({ ui, audio, stages }) {
         });
       }
     }
+    if (tIdx < 0) ui.setTimerText(null);
 
     forceRelayoutAll();
     state.rafId = requestAnimationFrame(loop);

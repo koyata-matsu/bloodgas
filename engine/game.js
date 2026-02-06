@@ -2,6 +2,10 @@ import { clamp } from "../utils/rand.js";
 import { applyLayout, pickTargetIndex, effectiveX } from "./layout.js";
 
 export function createGame({ ui, audio, stages }) {
+  const WRONG_SLOW_SEC = 0.5;
+  const WRONG_SLOW_MULT = 0.35;
+  const MIN_TIME_LIMIT_SEC = 2.5;
+
   const state = {
     stage: stages[0],
 
@@ -30,8 +34,6 @@ export function createGame({ ui, audio, stages }) {
     bgmMode: "early",
 
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
-
-    hintEnabled: true,
   };
 
   // callbacks
@@ -150,12 +152,6 @@ export function createGame({ ui, audio, stages }) {
     updateQuestionForTarget();
   }
 
-  function updateHints() {
-    const hints = state.stage.hints || [];
-    const show = state.hintEnabled && state.spawnedCount <= 10;
-    ui.setHints(hints, show);
-  }
-
   function updateQuestionForTarget() {
     const showQuestion = Boolean(state.stage.questionMode);
     ui.showQuestionArea(showQuestion);
@@ -234,8 +230,8 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function triggerSlow() {
-    state.slowHoldSec = 1.0;
-    state.slowMult = 0.18;
+    state.slowHoldSec = WRONG_SLOW_SEC;
+    state.slowMult = WRONG_SLOW_MULT;
   }
 
   function clearCards() {
@@ -273,7 +269,6 @@ export function createGame({ ui, audio, stages }) {
     setHUD();
     cbFeedback("");
     ui.setLaneHeight(getMaxConcurrent());
-    updateHints();
     updateQuestionForTarget();
 
     // ★ここでchoicesを安全に描画
@@ -305,13 +300,12 @@ export function createGame({ ui, audio, stages }) {
 
     state.spawnedCount += 1;
     if (!state.stage.staticQuestion) {
-      state.timeLimitSec = Math.max(0.2, state.timeLimitSec - 0.08);
+      state.timeLimitSec = Math.max(MIN_TIME_LIMIT_SEC, state.timeLimitSec - 0.08);
     }
     state.lastSpawnAt = performance.now() / 1000;
 
     setBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
     forceRelayoutAll();
-    updateHints();
 
     // ★ターゲットが変わるので必ず更新
     updateChoicesForTarget();
@@ -489,6 +483,14 @@ export function createGame({ ui, audio, stages }) {
       if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
         state.stage.advanceQuestion(card.q);
         ui.updateCardElement(card.el, card.q);
+        if (result.resetCard) {
+          const cardWidth = card.el?.getBoundingClientRect().width || 0;
+          const startX = ui.el.lane.clientWidth + cardWidth / 2;
+          const baseLeft = card.baseLeft || 0;
+          card.x = startX - baseLeft;
+          card.bornAt = performance.now();
+          card.el.style.transform = `translateX(${card.x}px)`;
+        }
         updateChoicesForTarget();
         return;
       }
@@ -620,12 +622,6 @@ export function createGame({ ui, audio, stages }) {
           correctLabel: missInfo.correctLabel,
           explanation: missInfo.explanation,
         });
-        if (missInfo.correctLabel || missInfo.explanation) {
-          ui.showWrongModal({
-            answer: missInfo.correctLabel || "正解",
-            explanation: missInfo.explanation || "解説はありません。",
-          });
-        }
       }
     }
 
@@ -668,11 +664,13 @@ export function createGame({ ui, audio, stages }) {
     state.paused = !state.paused;
     ui.setPauseLabel(state.paused ? "再開" : "一時停止");
     if (!state.paused) {
+      ui.hidePauseGuide();
       state.lastTs = null;
       audio.bgm(state.bgmMode);
       stop();
       state.rafId = requestAnimationFrame(loop);
     } else {
+      ui.showPauseGuide(state.stage);
       audio.pauseBGM();
       stop();
     }
@@ -709,9 +707,5 @@ export function createGame({ ui, audio, stages }) {
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
     onLog: (fn) => (cbLog = fn),
-    setHintEnabled: (enabled) => {
-      state.hintEnabled = Boolean(enabled);
-      updateHints();
-    },
   };
 }

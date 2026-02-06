@@ -36,6 +36,10 @@ export function createStage5() {
     overlapStart: 14,
     needsComp: false,
     choices: CHOICES_STAGE5,
+    staticQuestion: true,
+    timeLimitStart: 10,
+    timeLimitMin: 3,
+    timeLimitDecay: 0.8,
     hints: [
       "pH 7.35–7.45 / PaCO₂ 35–45 / HCO₃⁻ 22–26 / AG 10–14",
     ],

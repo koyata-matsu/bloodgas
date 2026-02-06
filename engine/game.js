@@ -2,6 +2,10 @@ import { clamp } from "../utils/rand.js";
 import { applyLayout, pickTargetIndex, effectiveX } from "./layout.js";
 
 export function createGame({ ui, audio, stages }) {
+  const WRONG_SLOW_SEC = 0.5;
+  const WRONG_SLOW_MULT = 0.35;
+  const MIN_TIME_LIMIT_SEC = 2.5;
+
   const state = {
     stage: stages[0],
 
@@ -226,8 +230,8 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function triggerSlow() {
-    state.slowHoldSec = 1.0;
-    state.slowMult = 0.18;
+    state.slowHoldSec = WRONG_SLOW_SEC;
+    state.slowMult = WRONG_SLOW_MULT;
   }
 
   function clearCards() {
@@ -296,7 +300,7 @@ export function createGame({ ui, audio, stages }) {
 
     state.spawnedCount += 1;
     if (!state.stage.staticQuestion) {
-      state.timeLimitSec = Math.max(0.2, state.timeLimitSec - 0.08);
+      state.timeLimitSec = Math.max(MIN_TIME_LIMIT_SEC, state.timeLimitSec - 0.08);
     }
     state.lastSpawnAt = performance.now() / 1000;
 
@@ -610,12 +614,6 @@ export function createGame({ ui, audio, stages }) {
           correctLabel: missInfo.correctLabel,
           explanation: missInfo.explanation,
         });
-        if (missInfo.correctLabel || missInfo.explanation) {
-          ui.showWrongModal({
-            answer: missInfo.correctLabel || "正解",
-            explanation: missInfo.explanation || "解説はありません。",
-          });
-        }
       }
     }
 

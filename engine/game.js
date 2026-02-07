@@ -22,6 +22,7 @@ export function createGame({ ui, audio, stages }) {
     spawnedCount: 0,
     correct: 0,
     misses: 0,
+    consecutiveWrong: 0,
 
     spawnCooldown: 1.6,
     lastSpawnAt: -999, // sec
@@ -255,6 +256,7 @@ export function createGame({ ui, audio, stages }) {
     state.spawnedCount = 0;
     state.correct = 0;
     state.misses = 0;
+    state.consecutiveWrong = 0;
 
     state.spawnCooldown = 1.6;
     state.lastSpawnAt = -999;
@@ -431,6 +433,7 @@ export function createGame({ ui, audio, stages }) {
       });
     }
     state.misses += 1;
+    state.consecutiveWrong += 1;
     cbSfx("bad");
     cbJudgeFX(false);
     cbFeedback(text);
@@ -438,6 +441,12 @@ export function createGame({ ui, audio, stages }) {
 
     setHP(state.hp - loss, "loss");
     ui.shakeHP();
+
+    if (state.consecutiveWrong >= 2) {
+      const maxLimit = state.stage.timeLimitStart ?? state.timeLimitSec;
+      state.timeLimitSec = Math.min(maxLimit, state.timeLimitSec + 0.8);
+      state.consecutiveWrong = 0;
+    }
 
     const tIdx = pickTargetIndex(state.cards);
     if (tIdx >= 0) removeCardAt(tIdx);
@@ -489,6 +498,7 @@ export function createGame({ ui, audio, stages }) {
         : (result.feedback || "OK！");
       handleCorrect(okText);
       alreadyHandled = true;
+      state.consecutiveWrong = 0;
       if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
         state.stage.advanceQuestion(card.q);
         ui.updateCardElement(card.el, card.q);
@@ -502,6 +512,15 @@ export function createGame({ ui, audio, stages }) {
         }
         if (result.pauseAfterCorrect) {
           card.pauseUntil = performance.now() + (result.pauseSeconds ?? 5) * 1000;
+        }
+        if (result.centerAfterCorrect) {
+          const cardWidth = card.el?.getBoundingClientRect().width || 0;
+          const laneWidth = ui.el.lane.clientWidth || 0;
+          const desiredLeft = Math.max(0, (laneWidth - cardWidth) / 2);
+          const baseLeft = card.baseLeft || 0;
+          card.x = desiredLeft - baseLeft;
+          card.fixed = true;
+          card.el.style.transform = `translateX(${card.x}px)`;
         }
         updateChoicesForTarget();
         return;
@@ -523,6 +542,7 @@ export function createGame({ ui, audio, stages }) {
     }
 
     if (!alreadyHandled) handleCorrect();
+    state.consecutiveWrong = 0;
 
     // complete card
     state.correct += 1;
@@ -636,6 +656,7 @@ export function createGame({ ui, audio, stages }) {
 
     const now = performance.now();
     for (const c of state.cards) {
+      if (c.fixed) continue;
       if (c.pauseUntil && now < c.pauseUntil) continue;
       const cardSpeedMult = Number.isFinite(c.q?.speedMult) ? c.q.speedMult : 1.0;
       c.x -= speed * dt * cardSpeedMult;

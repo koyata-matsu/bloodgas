@@ -16,6 +16,7 @@ export function createUI() {
     questionArea: $("questionArea"),
     questionStep: $("questionStep"),
     questionText: $("questionText"),
+    timeCount: $("timeCount"),
     timeFill: $("timeFill"),
 
     lane: document.querySelector(".lane"),
@@ -35,13 +36,13 @@ export function createUI() {
     startBtn: $("startBtn"),
     startTitle: $("startTitle"),
     startDesc: $("startDesc"),
-    hintToggle: $("hintToggle"),
-    hintToggleState: $("hintToggleState"),
-
-    hintArea: $("hintArea"),
-    hintList: $("hintList"),
 
     judgeFx: $("judgeFx"),
+
+    pauseModal: $("pauseModal"),
+    pauseTitle: document.querySelector("#pauseModal .rankTitle"),
+    pauseContent: $("pauseContent"),
+    pauseCloseBtn: $("pauseCloseBtn"),
 
     resultModal: $("resultModal"),
     rankTitle: $("rankTitle"),
@@ -74,11 +75,11 @@ export function createUI() {
   let onSelectStage = () => {};
   let onStart = () => {};
   let onPauseToggle = () => {};
+  let onPauseAction = () => onPauseToggle();
   let onRestart = () => {};
   let onExit = () => {};
   let onChoice = () => {};
   let onComp = () => {};
-  let onHintToggle = () => {};
   let onResultRetry = () => {};
   let onResultNext = () => {};
   let onResultMenu = () => {};
@@ -164,6 +165,15 @@ export function createUI() {
     el.timeFill.style.transform = `scaleX(${safeRatio})`;
   }
 
+  function setTimerText(seconds) {
+    if (!el.timeCount) return;
+    if (!Number.isFinite(seconds)) {
+      el.timeCount.textContent = "";
+      return;
+    }
+    el.timeCount.textContent = `${Math.ceil(seconds)}s`;
+  }
+
   function shakeHP() {
     if (!el.healthBar) return;
     el.healthBar.classList.remove("hpBarShake");
@@ -205,11 +215,6 @@ export function createUI() {
     if (el.pauseBtn) el.pauseBtn.textContent = text;
   }
 
-  function setHintToggle(enabled) {
-    if (el.hintToggle) el.hintToggle.checked = Boolean(enabled);
-    if (el.hintToggleState) el.hintToggleState.textContent = enabled ? "ON" : "OFF";
-  }
-
   function renderChoices(labels) {
     if (!el.choices) return;
     el.choices.innerHTML = "";
@@ -222,20 +227,40 @@ export function createUI() {
     });
   }
 
-  function setHints(hints, show) {
-    if (!el.hintArea || !el.hintList) return;
-    if (!Array.isArray(hints) || hints.length === 0) {
-      el.hintArea.classList.add("hidden");
-      el.hintList.innerHTML = "";
-      return;
-    }
-    el.hintList.innerHTML = "";
-    hints.forEach((text) => {
-      const li = document.createElement("li");
-      li.textContent = text;
-      el.hintList.appendChild(li);
-    });
-    el.hintArea.classList.toggle("hidden", !show);
+  function showPauseGuide(stage) {
+    if (!el.pauseModal || !el.pauseContent) return;
+    const hints = Array.isArray(stage?.hints) ? stage.hints : [];
+    const hintHtml = hints.length
+      ? `<div class="pauseHints"><h4>ヒント</h4><ul>${hints.map((text) => `<li>${text}</li>`).join("")}</ul></div>`
+      : "";
+    const lessonHtml = stage?.lessonHTML || "<p>このステージの解説はありません。</p>";
+    el.pauseContent.innerHTML = `${lessonHtml}${hintHtml}`;
+    if (el.pauseTitle) el.pauseTitle.textContent = "一時停止中：知識メモ";
+    if (el.pauseCloseBtn) el.pauseCloseBtn.textContent = "再開";
+    onPauseAction = () => onPauseToggle();
+    el.pauseModal.classList.remove("hidden");
+  }
+
+  function hidePauseGuide() {
+    if (!el.pauseModal) return;
+    el.pauseModal.classList.add("hidden");
+  }
+
+  function showLessonIntro(stage, onConfirm) {
+    if (!el.pauseModal || !el.pauseContent) return;
+    const hints = Array.isArray(stage?.hints) ? stage.hints : [];
+    const hintHtml = hints.length
+      ? `<div class="pauseHints"><h4>ヒント</h4><ul>${hints.map((text) => `<li>${text}</li>`).join("")}</ul></div>`
+      : "";
+    const lessonHtml = stage?.lessonHTML || "<p>このステージの解説はありません。</p>";
+    el.pauseContent.innerHTML = `${lessonHtml}${hintHtml}`;
+    if (el.pauseTitle) el.pauseTitle.textContent = "開始前：解説";
+    if (el.pauseCloseBtn) el.pauseCloseBtn.textContent = "スタート";
+    onPauseAction = () => {
+      hidePauseGuide();
+      onConfirm?.();
+    };
+    el.pauseModal.classList.remove("hidden");
   }
 
   function renderMultiChoices(labels, submitLabel = "決定") {
@@ -364,20 +389,26 @@ export function createUI() {
     }
 
     // 既存：pH/PaCO2/HCO3（必要ならAG追加）
-    const agHtml = q.ag !== undefined
-      ? `
-        <span class="qSep">/</span>
-        <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
-      `
-      : "";
-    card.innerHTML = `
-      <div class="qOne">
+    const row1 = `
+      <div class="qRow">
         <span class="qItem ph"><b>pH</b> <span class="vph">${Number(q.ph).toFixed(2)}</span></span>
         <span class="qSep">/</span>
         <span class="qItem co2"><b>PaCO₂</b> <span class="vpco2">${q.paco2}</span> <span class="unit">mmHg</span></span>
         <span class="qSep">/</span>
         <span class="qItem hco3"><b>HCO₃⁻</b> <span class="vhco3">${q.hco3}</span> <span class="unit">mEq/L</span></span>
-        ${agHtml}
+      </div>
+    `;
+    const row2 = q.ag !== undefined
+      ? `
+        <div class="qRow">
+          <span class="qItem ag"><b>AG</b> <span class="vag">${q.ag}</span> <span class="unit">mEq/L</span></span>
+        </div>
+      `
+      : "";
+    card.innerHTML = `
+      <div class="qOne">
+        ${row1}
+        ${row2}
       </div>
       <div class="qIcon" aria-hidden="true">🚑</div>
     `;
@@ -405,7 +436,7 @@ export function createUI() {
     if (!el.resultModal) return;
     el.resultModal.classList.remove("hidden");
 
-    if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "✅ ステージクリア！" : "💀 ゲームオーバー";
+    if (el.rankTitle) el.rankTitle.textContent = result.cleared ? "ステージクリア！！" : "💀 ゲームオーバー";
     if (el.scoreNum) {
       const clearCount = result.clearCount;
       const scoreText = Number.isFinite(clearCount)
@@ -443,14 +474,9 @@ export function createUI() {
   });
 
   el.startBtn?.addEventListener("click", () => onStart());
-  el.hintToggle?.addEventListener("change", (event) => {
-    const target = event.target;
-    const enabled = Boolean(target?.checked);
-    setHintToggle(enabled);
-    onHintToggle(enabled);
-  });
 
   el.pauseBtn?.addEventListener("click", () => onPauseToggle());
+  el.pauseCloseBtn?.addEventListener("click", () => onPauseAction());
   el.restartBtn?.addEventListener("click", () => onRestart());
   el.exitBtn?.addEventListener("click", () => onExit());
 
@@ -462,6 +488,7 @@ export function createUI() {
   el.menuBtn?.addEventListener("click", () => onResultMenu());
   el.downloadLogBtn?.addEventListener("click", () => onDownloadLog());
   el.resultModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => hideResult());
+  el.pauseModal?.querySelector(".modalBackdrop")?.addEventListener("click", () => onPauseAction());
 
   // init
   renderChoices(["代謝性アシドーシス","呼吸性アシドーシス","代謝性アルカローシス","呼吸性アルカローシス"]);
@@ -480,17 +507,19 @@ export function createUI() {
     setQuestionText,
     setQuestionStep,
     setTimerProgress,
+    setTimerText,
     shakeHP,
     setFeedback,
     showJudge,
     showStartOverlay,
     hideStartOverlay,
     setPauseLabel,
-    setHintToggle,
     renderChoices,
-    setHints,
     renderMultiChoices,
     showCompButtons,
+    showPauseGuide,
+    hidePauseGuide,
+    showLessonIntro,
     createCardElement,
     updateCardElement,
     showResult,
@@ -503,7 +532,6 @@ export function createUI() {
     onExit: (fn) => (onExit = fn),
     onChoice: (fn) => (onChoice = fn),
     onCompChoice: (fn) => (onComp = fn),
-    onHintToggle: (fn) => (onHintToggle = fn),
     onResultRetry: (fn) => (onResultRetry = fn),
     onResultNextStage: (fn) => (onResultNext = fn),
     onResultMenu: (fn) => (onResultMenu = fn),

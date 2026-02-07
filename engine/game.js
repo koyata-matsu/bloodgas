@@ -2,6 +2,11 @@ import { clamp } from "../utils/rand.js";
 import { applyLayout, pickTargetIndex, effectiveX } from "./layout.js";
 
 export function createGame({ ui, audio, stages }) {
+  const GLOBAL_CLEAR_COUNT = 30;
+  const WRONG_SLOW_SEC = 0.5;
+  const WRONG_SLOW_MULT = 0.35;
+  const MIN_TIME_LIMIT_SEC = 2.5;
+
   const state = {
     stage: stages[0],
 
@@ -17,12 +22,14 @@ export function createGame({ ui, audio, stages }) {
     spawnedCount: 0,
     correct: 0,
     misses: 0,
+    consecutiveWrong: 0,
 
     spawnCooldown: 1.6,
     lastSpawnAt: -999, // sec
     minGapTwoLane: 0.8,
 
     inputLocked: false,
+    unlockedStageId: null,
 
     slowHoldSec: 0,
     slowMult: 1.0,
@@ -30,8 +37,6 @@ export function createGame({ ui, audio, stages }) {
     bgmMode: "early",
 
     cards: [], // {q, laneId, baseLeft, x, bornAt, el}
-
-    hintEnabled: true,
   };
 
   // callbacks
@@ -150,12 +155,6 @@ export function createGame({ ui, audio, stages }) {
     updateQuestionForTarget();
   }
 
-  function updateHints() {
-    const hints = state.stage.hints || [];
-    const show = state.hintEnabled && state.spawnedCount <= 10;
-    ui.setHints(hints, show);
-  }
-
   function updateQuestionForTarget() {
     const showQuestion = Boolean(state.stage.questionMode);
     ui.showQuestionArea(showQuestion);
@@ -220,11 +219,13 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function setHUD() {
-    const isClearFinite = Number.isFinite(state.stage.clearCount);
-    const remainClear = isClearFinite
-      ? Math.max(0, state.stage.clearCount - state.correct)
+    const clearTarget = Number.isFinite(state.stage.clearCount)
+      ? state.stage.clearCount
+      : (Number.isFinite(state.stage.unlockNeed) ? state.stage.unlockNeed : null);
+    const remainClear = Number.isFinite(clearTarget)
+      ? Math.max(0, clearTarget - state.correct)
       : null;
-    const clearText = isClearFinite
+    const clearText = Number.isFinite(remainClear)
       ? (remainClear === 0 ? "クリア達成！" : `クリアまであと ${remainClear}問`)
       : "クリアまであと何問";
     cbHUD({
@@ -234,8 +235,8 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function triggerSlow() {
-    state.slowHoldSec = 1.0;
-    state.slowMult = 0.18;
+    state.slowHoldSec = WRONG_SLOW_SEC;
+    state.slowMult = WRONG_SLOW_MULT;
   }
 
   function clearCards() {
@@ -255,10 +256,12 @@ export function createGame({ ui, audio, stages }) {
     state.spawnedCount = 0;
     state.correct = 0;
     state.misses = 0;
+    state.consecutiveWrong = 0;
 
     state.spawnCooldown = 1.6;
     state.lastSpawnAt = -999;
     state.inputLocked = false;
+    state.unlockedStageId = null;
 
     state.slowHoldSec = 0;
     state.slowMult = 1.0;
@@ -272,8 +275,8 @@ export function createGame({ ui, audio, stages }) {
     setHP(state.hp, null);
     setHUD();
     cbFeedback("");
+    ui.setTimerText(null);
     ui.setLaneHeight(getMaxConcurrent());
-    updateHints();
     updateQuestionForTarget();
 
     // ★ここでchoicesを安全に描画
@@ -305,13 +308,12 @@ export function createGame({ ui, audio, stages }) {
 
     state.spawnedCount += 1;
     if (!state.stage.staticQuestion) {
-      state.timeLimitSec = Math.max(0.2, state.timeLimitSec - 0.08);
+      state.timeLimitSec = Math.max(MIN_TIME_LIMIT_SEC, state.timeLimitSec - 0.08);
     }
     state.lastSpawnAt = performance.now() / 1000;
 
     setBgmMode(state.spawnedCount >= state.stage.overlapStart ? "late" : "early");
     forceRelayoutAll();
-    updateHints();
 
     // ★ターゲットが変わるので必ず更新
     updateChoicesForTarget();
@@ -367,8 +369,11 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function unlockNextIfNeeded() {
-    if (state.correct >= state.stage.unlockNeed) {
+    if (Number.isFinite(state.stage.unlockNeed)
+      && state.correct >= state.stage.unlockNeed) {
       const nextId = Math.min(state.stage.id + 1, stages.length);
+      if (state.unlockedStageId === nextId) return nextId;
+      state.unlockedStageId = nextId;
       cbUnlockStage(nextId);
       return nextId;
     }
@@ -382,7 +387,8 @@ export function createGame({ ui, audio, stages }) {
   }
 
   function getUnlockedNextStageId() {
-    if (state.correct >= state.stage.unlockNeed) return getNextStageId();
+    if (Number.isFinite(state.stage.unlockNeed)
+      && state.correct >= state.stage.unlockNeed) return getNextStageId();
     return null;
   }
 
@@ -392,11 +398,10 @@ export function createGame({ ui, audio, stages }) {
     stop();
     audio.stopBGM();
 
-    const cleared = Number.isFinite(state.stage.clearCount)
-      && state.correct >= state.stage.clearCount;
-    if (cleared) {
-      cbSfx("finish");
-    } else if (reason !== "manual") {
+    const cleared = (Number.isFinite(state.stage.clearCount)
+      && state.correct >= state.stage.clearCount)
+      || state.correct >= GLOBAL_CLEAR_COUNT;
+    if (!cleared && reason !== "manual") {
       cbSfx("gameover");
     }
 
@@ -428,6 +433,7 @@ export function createGame({ ui, audio, stages }) {
       });
     }
     state.misses += 1;
+    state.consecutiveWrong += 1;
     cbSfx("bad");
     cbJudgeFX(false);
     cbFeedback(text);
@@ -435,6 +441,12 @@ export function createGame({ ui, audio, stages }) {
 
     setHP(state.hp - loss, "loss");
     ui.shakeHP();
+
+    if (state.consecutiveWrong >= 2) {
+      const maxLimit = state.stage.timeLimitStart ?? state.timeLimitSec;
+      state.timeLimitSec = Math.min(maxLimit, state.timeLimitSec + 0.8);
+      state.consecutiveWrong = 0;
+    }
 
     const tIdx = pickTargetIndex(state.cards);
     if (tIdx >= 0) removeCardAt(tIdx);
@@ -486,9 +498,30 @@ export function createGame({ ui, audio, stages }) {
         : (result.feedback || "OK！");
       handleCorrect(okText);
       alreadyHandled = true;
+      state.consecutiveWrong = 0;
       if (typeof state.stage.advanceQuestion === "function" && result.done === false) {
         state.stage.advanceQuestion(card.q);
         ui.updateCardElement(card.el, card.q);
+        if (result.resetCard) {
+          const cardWidth = card.el?.getBoundingClientRect().width || 0;
+          const startX = ui.el.lane.clientWidth + cardWidth / 2;
+          const baseLeft = card.baseLeft || 0;
+          card.x = startX - baseLeft;
+          card.bornAt = performance.now();
+          card.el.style.transform = `translateX(${card.x}px)`;
+        }
+        if (result.pauseAfterCorrect) {
+          card.pauseUntil = performance.now() + (result.pauseSeconds ?? 5) * 1000;
+        }
+        if (result.centerAfterCorrect) {
+          const cardWidth = card.el?.getBoundingClientRect().width || 0;
+          const laneWidth = ui.el.lane.clientWidth || 0;
+          const desiredLeft = Math.max(0, (laneWidth - cardWidth) / 2);
+          const baseLeft = card.baseLeft || 0;
+          card.x = desiredLeft - baseLeft;
+          card.fixed = true;
+          card.el.style.transform = `translateX(${card.x}px)`;
+        }
         updateChoicesForTarget();
         return;
       }
@@ -509,6 +542,7 @@ export function createGame({ ui, audio, stages }) {
     }
 
     if (!alreadyHandled) handleCorrect();
+    state.consecutiveWrong = 0;
 
     // complete card
     state.correct += 1;
@@ -520,6 +554,11 @@ export function createGame({ ui, audio, stages }) {
       const minLimit = state.stage.timeLimitMin ?? 0.2;
       const decay = state.stage.timeLimitDecay ?? 2;
       state.timeLimitSec = Math.max(minLimit, state.timeLimitSec - decay);
+      const recover = state.stage.timeLimitRecover ?? 0;
+      if (recover > 0) {
+        const maxLimit = state.stage.timeLimitStart ?? state.timeLimitSec;
+        state.timeLimitSec = Math.min(maxLimit, state.timeLimitSec + recover);
+      }
     } else {
       state.timeLimitSec = Math.max(0.2, state.timeLimitSec - 0.55);
     }
@@ -536,6 +575,11 @@ export function createGame({ ui, audio, stages }) {
       correctLabel: result?.correctLabel || "",
       explanation: result?.explanation || "",
     });
+
+    if (state.correct >= GLOBAL_CLEAR_COUNT) {
+      finish("clear");
+      return;
+    }
 
     const unlocked = unlockNextIfNeeded();
     setHUD();
@@ -579,13 +623,25 @@ export function createGame({ ui, audio, stages }) {
         const elapsed = (performance.now() - t.bornAt) / 1000;
         const timeLeft = Math.max(0, state.timeLimitSec - elapsed);
         ui.setTimerProgress(timeLeft / Math.max(0.001, state.timeLimitSec));
+        ui.setTimerText(timeLeft);
         if (timeLeft <= 0) {
-          handleWrong("時間切れ！", 12);
+          const missInfo = getCorrectInfoForQuestion(t.q);
+          const feedbackText = missInfo.explanation
+            ? `ミス！ ${missInfo.explanation}`
+            : "ミス！";
+          handleWrong(feedbackText, 12, {
+            outcome: "timeout",
+            q: t.q,
+            elapsedSec: elapsed,
+            correctLabel: missInfo.correctLabel,
+            explanation: missInfo.explanation,
+          });
           if (state.running && !state.paused) state.rafId = requestAnimationFrame(loop);
           return;
         }
       } else {
         ui.setTimerProgress(1);
+        ui.setTimerText(null);
       }
       forceRelayoutAll();
       state.rafId = requestAnimationFrame(loop);
@@ -598,7 +654,10 @@ export function createGame({ ui, audio, stages }) {
     const baseSpeed = dist / Math.max(0.001, state.timeLimitSec);
     const speed = baseSpeed * mult;
 
+    const now = performance.now();
     for (const c of state.cards) {
+      if (c.fixed) continue;
+      if (c.pauseUntil && now < c.pauseUntil) continue;
       const cardSpeedMult = Number.isFinite(c.q?.speedMult) ? c.q.speedMult : 1.0;
       c.x -= speed * dt * cardSpeedMult;
     }
@@ -607,8 +666,26 @@ export function createGame({ ui, audio, stages }) {
     const tIdx = pickTargetIndex(state.cards);
     if (tIdx >= 0) {
       const t = state.cards[tIdx];
+      const elapsedSec = (performance.now() - t.bornAt) / 1000;
+      const timeLeft = Math.max(0, state.timeLimitSec - elapsedSec);
+      ui.setTimerText(timeLeft);
+      if (t.pauseUntil) {
+        if (now >= t.pauseUntil) {
+          t.pauseUntil = null;
+          const missInfo = getCorrectInfoForQuestion(t.q);
+          const feedbackText = missInfo.explanation
+            ? `ミス！ ${missInfo.explanation}`
+            : "ミス！";
+          handleWrong(feedbackText, 12, {
+            outcome: "timeout",
+            q: t.q,
+            elapsedSec,
+            correctLabel: missInfo.correctLabel,
+            explanation: missInfo.explanation,
+          });
+        }
+      } else
       if (effectiveX(t) <= ui.layout.MISS_X) {
-        const elapsedSec = (performance.now() - t.bornAt) / 1000;
         const missInfo = getCorrectInfoForQuestion(t.q);
         const feedbackText = missInfo.explanation
           ? `ミス！ ${missInfo.explanation}`
@@ -620,14 +697,9 @@ export function createGame({ ui, audio, stages }) {
           correctLabel: missInfo.correctLabel,
           explanation: missInfo.explanation,
         });
-        if (missInfo.correctLabel || missInfo.explanation) {
-          ui.showWrongModal({
-            answer: missInfo.correctLabel || "正解",
-            explanation: missInfo.explanation || "解説はありません。",
-          });
-        }
       }
     }
+    if (tIdx < 0) ui.setTimerText(null);
 
     forceRelayoutAll();
     state.rafId = requestAnimationFrame(loop);
@@ -668,11 +740,13 @@ export function createGame({ ui, audio, stages }) {
     state.paused = !state.paused;
     ui.setPauseLabel(state.paused ? "再開" : "一時停止");
     if (!state.paused) {
+      ui.hidePauseGuide();
       state.lastTs = null;
       audio.bgm(state.bgmMode);
       stop();
       state.rafId = requestAnimationFrame(loop);
     } else {
+      ui.showPauseGuide(state.stage);
       audio.pauseBGM();
       stop();
     }
@@ -709,9 +783,5 @@ export function createGame({ ui, audio, stages }) {
     onJudgeFX: (fn) => (cbJudgeFX = fn),
     onResult: (fn) => (cbResult = fn),
     onLog: (fn) => (cbLog = fn),
-    setHintEnabled: (enabled) => {
-      state.hintEnabled = Boolean(enabled);
-      updateHints();
-    },
   };
 }

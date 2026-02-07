@@ -9,36 +9,29 @@ import { createStage3 } from "./stages/stage3.js";
 import { createStage4 } from "./stages/stage4.js";
 import { createStage5 } from "./stages/stage5.js";
 import { createStage6 } from "./stages/stage6.js";
+import { loadStage6Cases } from "./stages/stage6_cases.js";
 
 const LS_UNLOCK_KEY = "bg_unlocked_stage_max";
 const LS_CLEARED_KEY = "bg_cleared_stage_ids_v1";
-const LS_HINT_KEY = "bg_hint_first10";
 
-const ui = createUI();
-const audio = createAudio();
-const DEFAULT_CARD_MIN = ui.layout.CARD_W_MIN;
-const DEFAULT_CARD_MAX = ui.layout.CARD_W_MAX;
-
-const stages = [
-  createStage0(),
-  createStage1(),
-  createStage2(),
-  createStage3(),
-  createStage4(),
-  createStage5(),
-  createStage6(),
-];
-
-const game = createGame({ ui, audio, stages });
+let ui;
+let audio;
+let game;
+let DEFAULT_CARD_MIN;
+let DEFAULT_CARD_MAX;
 
 let selectedStageId = 1;
 let activeRunId = null;
 let runStartAt = null;
 let runEvents = [];
+let stages = [];
 
 const LS_LOG_KEY = "bg_game_logs_v1";
 const LS_LOG_UPLOAD_URL_KEY = "bg_log_upload_url";
 const LS_LOG_LAST_UPLOAD_KEY = "bg_log_last_upload_at";
+const LS_STAGE6_CASES_URL_KEY = "bg_stage6_cases_url";
+const DEFAULT_STAGE6_CASES_URL = "https://docs.google.com/spreadsheets/d/16jZF5LsRvIE1viFZTG5GEo2evPDuQnLOoVR6kx3z5LM/edit?gid=0#gid=0";
+const FORCE_UNLOCK_ALL_STAGES = true;
 const UPLOAD_INTERVAL_MS = 1000 * 60 * 60 * 24;
 const DEFAULT_UPLOAD_URL = "https://script.google.com/macros/s/AKfycbwsDePBZyEwAluHo6n3p8XDtuECic04pFljbyZd-kqFS02VX6AIrQ5p3I1L5jpl_AH-/exec";
 
@@ -189,6 +182,28 @@ function getUploadUrl() {
     || DEFAULT_UPLOAD_URL;
 }
 
+function normalizeStage6CasesUrl(rawUrl) {
+  if (!rawUrl) return "";
+  try {
+    const url = new URL(rawUrl);
+    if (url.hostname.includes("docs.google.com") && url.pathname.includes("/spreadsheets/d/")) {
+      const [, , , , sheetId] = url.pathname.split("/");
+      const gid = url.searchParams.get("gid");
+      const exportUrl = new URL(`https://docs.google.com/spreadsheets/d/${sheetId}/export`);
+      exportUrl.searchParams.set("format", "csv");
+      if (gid) exportUrl.searchParams.set("gid", gid);
+      return exportUrl.toString();
+    }
+    return rawUrl;
+  } catch (error) {
+    return rawUrl;
+  }
+}
+
+function getStage6CasesUrl() {
+  return normalizeStage6CasesUrl(DEFAULT_STAGE6_CASES_URL);
+}
+
 function getLastUploadAt() {
   const raw = localStorage.getItem(LS_LOG_LAST_UPLOAD_KEY);
   return raw ? Number(raw) : 0;
@@ -196,6 +211,24 @@ function getLastUploadAt() {
 
 function setLastUploadAt(value) {
   localStorage.setItem(LS_LOG_LAST_UPLOAD_KEY, String(value));
+}
+
+async function bootApp() {
+  ui = createUI();
+  audio = createAudio();
+  DEFAULT_CARD_MIN = ui.layout.CARD_W_MIN;
+  DEFAULT_CARD_MAX = ui.layout.CARD_W_MAX;
+  const stage6Cases = await loadStage6Cases(getStage6CasesUrl());
+  stages = [
+    createStage0(),
+    createStage1(),
+    createStage2(),
+    createStage3(),
+    createStage4(),
+    createStage5(),
+    createStage6(stage6Cases),
+  ];
+  game = createGame({ ui, audio, stages });
 }
 
 function collectPendingEvents() {
@@ -239,6 +272,7 @@ async function uploadLogsIfDue() {
 }
 
 function getUnlockedMax() {
+  if (FORCE_UNLOCK_ALL_STAGES) return stages.length;
   const raw = localStorage.getItem(LS_UNLOCK_KEY);
   const parsed = Number.parseInt(raw ?? "", 10);
   if (!Number.isFinite(parsed) || parsed < 1) return 1;
@@ -247,14 +281,6 @@ function getUnlockedMax() {
 function setUnlockedMax(v) {
   const safe = Math.min(Math.max(1, v), stages.length);
   localStorage.setItem(LS_UNLOCK_KEY, String(safe));
-}
-
-function getHintEnabled() {
-  return localStorage.getItem(LS_HINT_KEY) !== "0";
-}
-
-function setHintEnabled(v) {
-  localStorage.setItem(LS_HINT_KEY, v ? "1" : "0");
 }
 
 function loadClearedStageIds() {
@@ -323,163 +349,162 @@ function setStageMode(stageId) {
   setStageLayout(stageId);
 }
 
-// ---- menu stage selection ----
-ui.onSelectStage((stageId) => {
-  selectedStageId = stageId;
-  const hintEnabled = getHintEnabled();
-  ui.setHintToggle(hintEnabled);
-  game.setHintEnabled(hintEnabled);
-  game.setStage(stageId);
-  applyStageMeta(stageId);
-  audio.stopBGM();
-  setStageMode(stageId);
-  ui.showScreen("game");
-  startRunSession();
-  game.prepareRun();
-  refreshStageButtons();
-});
+async function initApp() {
+  await bootApp();
 
-uploadLogsIfDue();
+  // ---- menu stage selection ----
+  ui.onSelectStage((stageId) => {
+    selectedStageId = stageId;
+    ui.setPauseLabel("一時停止");
+    game.setStage(stageId);
+    applyStageMeta(stageId);
+    audio.stopBGM();
+    setStageMode(stageId);
+    ui.showScreen("game");
+    startRunSession();
+    game.prepareRun();
+    refreshStageButtons();
+  });
 
-ui.onStart(() => {
-  audio.unlockByGesture();
-  audio.click();
-  ui.hideStartOverlay();
-  game.startRun();
-});
+  uploadLogsIfDue();
 
-ui.onPauseToggle(() => game.togglePause());
-ui.onHintToggle((enabled) => {
-  setHintEnabled(enabled);
-  game.setHintEnabled(enabled);
-});
+  ui.onStart(() => {
+    audio.unlockByGesture();
+    audio.click();
+    ui.hideStartOverlay();
+    ui.showLessonIntro(game.stage, () => {
+      game.startRun();
+    });
+  });
 
-ui.onRestart(() => {
-  startRunSession();
-  game.prepareRun();
-});
-ui.onExit(() => {
-  const ended = game.endRun();
-  if (!ended) {
+  ui.onPauseToggle(() => game.togglePause());
+  ui.onRestart(() => {
+    startRunSession();
+    game.prepareRun();
+  });
+  ui.onExit(() => {
+    const ended = game.endRun();
+    if (!ended) {
+      game.stop();
+      audio.stopBGM();
+      setStageMode(null);
+      ui.showScreen("menu");
+    }
+  });
+
+  // result modal
+  ui.onResultRetry(() => {
+    ui.hideResult();
+    startRunSession();
+    game.prepareRun();
+  });
+
+  ui.onResultMenu(() => {
+    ui.hideResult();
     game.stop();
     audio.stopBGM();
     setStageMode(null);
     ui.showScreen("menu");
-  }
-});
-
-// result modal
-ui.onResultRetry(() => {
-  ui.hideResult();
-  startRunSession();
-  game.prepareRun();
-});
-
-ui.onResultMenu(() => {
-  ui.hideResult();
-  game.stop();
-  audio.stopBGM();
-  setStageMode(null);
-  ui.showScreen("menu");
-});
-
-ui.onResultNextStage(() => {
-  ui.hideResult();
-  const nextId = Math.min(selectedStageId + 1, stages.length);
-  if (nextId <= getUnlockedMax()) {
-    selectedStageId = nextId;
-    game.setStage(nextId);
-    applyStageMeta(nextId);
-    audio.stopBGM();
-    setStageMode(nextId);
-    ui.showScreen("game");
-    startRunSession();
-    game.prepareRun();
-  } else {
-    setStageMode(null);
-    ui.showScreen("menu");
-  }
-});
-
-// ---- game callbacks ----
-game.onUnlockStage((stageId) => {
-  unlockUpTo(stageId);
-  audio.unlock();
-});
-
-game.onBgmMode((mode) => audio.bgm(mode));
-
-game.onSFX((name) => {
-  if (name === "ok") audio.ok();
-  if (name === "bad") audio.bad();
-  if (name === "finish") audio.finish();
-  if (name === "gameover") audio.gameover();
-});
-
-game.onHUD((hud) => ui.setHUD(hud.stat, hud.sub));
-game.onHP((hp, hpMax, anim) => ui.setHP(hp, hpMax, anim));
-game.onFeedback((text) => ui.setFeedback(text));
-game.onJudgeFX((ok) => ui.showJudge(ok));
-ui.onDownloadLog(() => downloadLogCsv());
-
-game.onLog((payload) => {
-  recordLogEvent({
-    type: payload.type,
-    stageId: payload.stageId,
-    stageName: payload.stageName,
-    outcome: payload.outcome,
-    elapsedSec: payload.elapsedSec,
-    question: formatQuestionSummary(payload.q),
-    choice: payload.choiceLabel || "",
-    correctLabel: payload.correctLabel || "",
-    explanation: payload.explanation || "",
   });
-});
 
-game.onResult((result) => {
-  // 18問到達で解放 or クリアで次解放
-  if (result.unlockedNextStageId) unlockUpTo(result.unlockedNextStageId);
-  if (result.cleared) {
-    markStageCleared(result.stageId);
-    unlockUpTo(Math.min(result.stageId + 1, stages.length));
-  }
+  ui.onResultNextStage(() => {
+    ui.hideResult();
+    const nextId = Math.min(selectedStageId + 1, stages.length);
+    if (nextId <= getUnlockedMax()) {
+      selectedStageId = nextId;
+      game.setStage(nextId);
+      applyStageMeta(nextId);
+      audio.stopBGM();
+      setStageMode(nextId);
+      ui.showScreen("game");
+      startRunSession();
+      game.prepareRun();
+    } else {
+      setStageMode(null);
+      ui.showScreen("menu");
+    }
+  });
+
+  // ---- game callbacks ----
+  game.onUnlockStage((stageId) => {
+    unlockUpTo(stageId);
+    audio.unlock();
+  });
+
+  game.onBgmMode((mode) => audio.bgm(mode));
+
+  game.onSFX((name) => {
+    if (name === "ok") audio.ok();
+    if (name === "bad") audio.bad();
+    if (name === "finish") audio.finish();
+    if (name === "gameover") audio.gameover();
+  });
+
+  game.onHUD((hud) => ui.setHUD(hud.stat, hud.sub));
+  game.onHP((hp, hpMax, anim) => ui.setHP(hp, hpMax, anim));
+  game.onFeedback((text) => ui.setFeedback(text));
+  game.onJudgeFX((ok) => ui.showJudge(ok));
+  ui.onDownloadLog(() => downloadLogCsv());
+
+  game.onLog((payload) => {
+    recordLogEvent({
+      type: payload.type,
+      stageId: payload.stageId,
+      stageName: payload.stageName,
+      outcome: payload.outcome,
+      elapsedSec: payload.elapsedSec,
+      question: formatQuestionSummary(payload.q),
+      choice: payload.choiceLabel || "",
+      correctLabel: payload.correctLabel || "",
+      explanation: payload.explanation || "",
+    });
+  });
+
+  game.onResult((result) => {
+    // 18問到達で解放 or クリアで次解放
+    if (result.unlockedNextStageId) unlockUpTo(result.unlockedNextStageId);
+    if (result.cleared) {
+      markStageCleared(result.stageId);
+      unlockUpTo(Math.min(result.stageId + 1, stages.length));
+    }
+    refreshStageButtons();
+
+    // 次ボタンを押せるように
+    ui.showResult(result);
+
+    const correctTimes = runEvents
+      .filter(event => event.type === "question" && event.outcome === "correct")
+      .map(event => event.elapsedSec)
+      .filter(value => Number.isFinite(value));
+    const avgCorrectSec = correctTimes.length
+      ? correctTimes.reduce((sum, value) => sum + value, 0) / correctTimes.length
+      : null;
+    const wrongQuestions = runEvents
+      .filter(event => event.type === "question" && event.outcome !== "correct")
+      .map(event => event.question)
+      .filter(Boolean)
+      .join(" | ");
+    recordLogEvent({
+      type: "stage",
+      stageId: result.stageId,
+      stageName: result.stageName,
+      correct: result.correct,
+      misses: result.misses,
+      totalQuestions: result.correct + result.misses,
+      rate: result.rate,
+      avgCorrectSec,
+      runStartAt,
+      runEndAt: new Date().toISOString(),
+      wrongQuestions,
+    });
+    void uploadLogsIfDue();
+  });
+
+  // init
   refreshStageButtons();
+  applyStageMeta(1);
+  ui.setPauseLabel("一時停止");
+  ui.showScreen("menu");
+}
 
-  // 次ボタンを押せるように
-  ui.showResult(result);
-
-  const correctTimes = runEvents
-    .filter(event => event.type === "question" && event.outcome === "correct")
-    .map(event => event.elapsedSec)
-    .filter(value => Number.isFinite(value));
-  const avgCorrectSec = correctTimes.length
-    ? correctTimes.reduce((sum, value) => sum + value, 0) / correctTimes.length
-    : null;
-  const wrongQuestions = runEvents
-    .filter(event => event.type === "question" && event.outcome !== "correct")
-    .map(event => event.question)
-    .filter(Boolean)
-    .join(" | ");
-  recordLogEvent({
-    type: "stage",
-    stageId: result.stageId,
-    stageName: result.stageName,
-    correct: result.correct,
-    misses: result.misses,
-    totalQuestions: result.correct + result.misses,
-    rate: result.rate,
-    avgCorrectSec,
-    runStartAt,
-    runEndAt: new Date().toISOString(),
-    wrongQuestions,
-  });
-  void uploadLogsIfDue();
-});
-
-// init
-refreshStageButtons();
-applyStageMeta(1);
-const hintEnabled = getHintEnabled();
-ui.setHintToggle(hintEnabled);
-game.setHintEnabled(hintEnabled);
-ui.showScreen("menu");
+void initApp();

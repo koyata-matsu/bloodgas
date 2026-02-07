@@ -130,8 +130,8 @@ export function createStage4() {
       return bank[idx++];
     },
 
-    maxConcurrent(correct, spawnedCount) {
-      return (correct >= 9 || spawnedCount >= 9) ? 2 : 1;
+    maxConcurrent() {
+      return 1;
     },
 
     checkChoice(q, choiceIdx) {

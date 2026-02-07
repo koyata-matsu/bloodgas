@@ -25,6 +25,7 @@ const TOL = 1; // 「実測＝予測」扱いの許容幅（±）
 const PAUSE_SECONDS_START = 8;
 const PAUSE_SECONDS_MIN = 5;
 const PAUSE_SECONDS_DECAY = 0.5;
+const STAGE2_VERSION = "2024-10-01";
 
 function predPaCO2(hco3) {
   return hco3 + 15;

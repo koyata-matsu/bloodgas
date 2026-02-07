@@ -198,7 +198,8 @@ export function createStage2() {
     },
     advanceQuestion(q) {
       q.step = 1;
-      pauseSeconds = Math.max(PAUSE_SECONDS_MIN, pauseSeconds - PAUSE_SECONDS_DECAY);
+      pauseSeconds = Math.max(8, pauseSeconds - 0.5);
     },
+
   };
 }

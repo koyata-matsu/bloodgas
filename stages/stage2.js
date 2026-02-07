@@ -22,6 +22,10 @@ const CHOICES_STAGE2_COMP = [
 ];
 
 const TOL = 1; // 「実測＝予測」扱いの許容幅（±）
+const PAUSE_SECONDS_START = 8;
+const PAUSE_SECONDS_MIN = 5;
+const PAUSE_SECONDS_DECAY = 0.5;
+const STAGE2_VERSION = "2024-10-01";
 
 function predPaCO2(hco3) {
   return hco3 + 15;
@@ -103,7 +107,7 @@ function makeBank() {
 export function createStage2() {
   let bank = makeBank();
   let idx = 0;
-  let pauseSeconds = 8;
+  let pauseSeconds = PAUSE_SECONDS_START;
 
   return {
     id: 3,
@@ -176,11 +180,7 @@ export function createStage2() {
           correct,
           done: false,
           pauseAfterCorrect: correct,
-<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
           pauseSeconds,
-=======
-          pauseSeconds: 8,
->>>>>>> main
           explanation,
           correctLabel: label,
         };
@@ -198,10 +198,8 @@ export function createStage2() {
     },
     advanceQuestion(q) {
       q.step = 1;
-<<<<<<< codex/export-stage-1-6-problems-to-spreadsheet-4b697c
       pauseSeconds = Math.max(8, pauseSeconds - 0.5);
-=======
->>>>>>> main
     },
+
   };
 }
